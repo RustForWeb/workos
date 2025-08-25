@@ -1,3 +1,14 @@
+# WARNING: Crate moved
+
+This crate has moved to [`workos`](https://crates.io/crates/workos). Please upgrade by changing the crate name in `Cargo.toml`:
+
+```diff
+- workos-sdk = "0.4.1"
++ workos = "0.5.0"
+```
+
+---
+
 # WorkOS Rust SDK
 
 [![Crates.io](https://img.shields.io/crates/v/workos-sdk.svg)](https://crates.io/crates/workos-sdk)
