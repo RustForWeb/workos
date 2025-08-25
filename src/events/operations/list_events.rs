@@ -63,9 +63,9 @@ pub trait ListEvents {
     /// # Examples
     ///
     /// ```
-    /// # use workos_sdk::WorkOsResult;
-    /// # use workos_sdk::events::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::WorkOsResult;
+    /// # use workos::events::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), ()> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));

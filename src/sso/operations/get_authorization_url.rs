@@ -54,8 +54,8 @@ pub trait GetAuthorizationUrl {
     ///
     /// ```
     /// # use url::ParseError;
-    /// # use workos_sdk::sso::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::sso::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));

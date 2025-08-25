@@ -111,9 +111,9 @@ pub trait ResetPassword {
     /// # Examples
     ///
     /// ```
-    /// # use workos_sdk::WorkOsResult;
-    /// # use workos_sdk::user_management::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::WorkOsResult;
+    /// # use workos::user_management::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), ResetPasswordError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));

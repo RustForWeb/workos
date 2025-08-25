@@ -57,11 +57,11 @@ pub trait AuthenticateWithTotp {
     /// ```
     /// # use std::{net::IpAddr, str::FromStr};
     ///
-    /// # use workos_sdk::WorkOsResult;
-    /// # use workos_sdk::mfa::AuthenticationChallengeId;
-    /// # use workos_sdk::sso::ClientId;
-    /// # use workos_sdk::user_management::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::WorkOsResult;
+    /// # use workos::mfa::AuthenticationChallengeId;
+    /// # use workos::sso::ClientId;
+    /// # use workos::user_management::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), AuthenticateError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));

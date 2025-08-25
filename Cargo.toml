@@ -1,5 +1,5 @@
 [package]
-name = "workos-sdk"
+name = "workos"
 version = "0.4.1"
 description = "Rust SDK for interacting with the WorkOS API."
 repository = "https://github.com/RustForWeb/workos"

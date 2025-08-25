@@ -22,8 +22,8 @@ pub trait GetLogoutUrl {
     ///
     /// ```
     /// # use url::{ParseError, Url};
-    /// # use workos_sdk::user_management::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::user_management::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));

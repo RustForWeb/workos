@@ -55,10 +55,10 @@ pub trait AuthenticateWithCode {
     /// ```
     /// # use std::{net::IpAddr, str::FromStr};
     ///
-    /// # use workos_sdk::WorkOsResult;
-    /// # use workos_sdk::sso::{AuthorizationCode, ClientId};
-    /// # use workos_sdk::user_management::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::WorkOsResult;
+    /// # use workos::sso::{AuthorizationCode, ClientId};
+    /// # use workos::user_management::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), AuthenticateError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));

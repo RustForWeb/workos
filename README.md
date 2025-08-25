@@ -1,19 +1,8 @@
-# WARNING: Crate moved
-
-This crate has moved to [`workos`](https://crates.io/crates/workos). Please upgrade by changing the crate name in `Cargo.toml`:
-
-```diff
-- workos-sdk = "0.4.1"
-+ workos = "0.5.0"
-```
-
----
-
 # WorkOS Rust SDK
 
-[![Crates.io](https://img.shields.io/crates/v/workos-sdk.svg)](https://crates.io/crates/workos-sdk)
-[![Docs.rs](https://docs.rs/workos-sdk/badge.svg)](https://docs.rs/workos-sdk/)
-[![License](https://img.shields.io/crates/l/workos-sdk.svg)](https://github.com/RustForWeb/workos/blob/main/LICENSE)
+[![Crates.io](https://img.shields.io/crates/v/workos.svg)](https://crates.io/crates/workos)
+[![Docs.rs](https://docs.rs/workos/badge.svg)](https://docs.rs/workos/)
+[![License](https://img.shields.io/crates/l/workos.svg)](https://github.com/RustForWeb/workos/blob/main/LICENSE.md)
 
 The WorkOS library for Rust provides convenient access to the WorkOS API from applications written in Rust.
 
@@ -21,7 +10,7 @@ The WorkOS library for Rust provides convenient access to the WorkOS API from ap
 
 Documentation for the crate is available on [Docs.rs](https://docs.rs/):
 
-- [`workos-sdk`](https://docs.rs/workos-sdk/latest/workos_sdk/)
+- [`workos`](https://docs.rs/workos/latest/workos/)
 
 ## Credits
 

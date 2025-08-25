@@ -49,9 +49,9 @@ pub trait ChallengeFactor {
     /// # Examples
     ///
     /// ```
-    /// # use workos_sdk::WorkOsResult;
-    /// # use workos_sdk::mfa::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::WorkOsResult;
+    /// # use workos::mfa::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), ChallengeFactorError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));

@@ -32,9 +32,9 @@ pub trait DeleteDirectory {
     /// # Examples
     ///
     /// ```
-    /// # use workos_sdk::WorkOsResult;
-    /// # use workos_sdk::directory_sync::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::WorkOsResult;
+    /// # use workos::directory_sync::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), DeleteDirectoryError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));

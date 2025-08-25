@@ -66,10 +66,10 @@ pub trait GeneratePortalLink {
     /// # Examples
     ///
     /// ```
-    /// # use workos_sdk::WorkOsResult;
-    /// # use workos_sdk::admin_portal::*;
-    /// # use workos_sdk::organizations::OrganizationId;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::WorkOsResult;
+    /// # use workos::admin_portal::*;
+    /// # use workos::organizations::OrganizationId;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), GeneratePortalLinkError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));
