@@ -48,7 +48,7 @@ impl GetMagicAuth for UserManagement<'_> {
             .workos
             .base_url()
             .join(&format!("/user_management/magic_auth/{id}"))?;
-        let organization = self
+        let magic_auth = self
             .workos
             .client()
             .get(url)
@@ -60,7 +60,7 @@ impl GetMagicAuth for UserManagement<'_> {
             .json::<MagicAuth>()
             .await?;
 
-        Ok(organization)
+        Ok(magic_auth)
     }
 }
 

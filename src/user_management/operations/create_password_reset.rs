@@ -105,7 +105,7 @@ impl CreatePasswordReset for UserManagement<'_> {
             .workos
             .base_url()
             .join("/user_management/password_reset")?;
-        let user = self
+        let password_reset = self
             .workos
             .client()
             .post(url)
@@ -119,7 +119,7 @@ impl CreatePasswordReset for UserManagement<'_> {
             .json::<PasswordReset>()
             .await?;
 
-        Ok(user)
+        Ok(password_reset)
     }
 }
 

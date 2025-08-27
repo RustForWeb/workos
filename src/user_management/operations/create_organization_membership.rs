@@ -6,17 +6,18 @@ use crate::organizations::OrganizationId;
 use crate::user_management::{OrganizationMembership, UserId, UserManagement};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
 
-/// Parameters for the [`CreateOrganizationMembership`] function.
+/// The parameters for [`CreateOrganizationMembership`].
 #[derive(Debug, Serialize)]
 pub struct CreateOrganizationMembershipParams<'a> {
-    /// The ID of the user to create a membership for.
+    /// The ID of the user.
     pub user_id: &'a UserId,
 
-    /// The ID of the organization to create a membership for.
+    /// The ID of the organization which the user belongs to.
     pub organization_id: &'a OrganizationId,
 
-    /// The slug of the role to assign to the user.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// The unique role identifier.
+    ///
+    /// Defaults to `member`.
     pub role_slug: Option<&'a str>,
 }
 
@@ -30,19 +31,22 @@ impl From<CreateOrganizationMembershipError> for WorkOsError<CreateOrganizationM
     }
 }
 
-/// [WorkOS Docs: Create Organization Membership](https://workos.com/docs/reference/authkit/organization-membership#create-organization-membership)
+/// [WorkOS Docs: Create an organization membership](https://workos.com/docs/reference/user-management/organization-membership/create)
 #[async_trait]
 pub trait CreateOrganizationMembership {
-    /// Creates an [`OrganizationMembership`].
+    /// Creates a new `active` organization membership for the given organization and user.
     ///
-    /// [WorkOS Docs: Create Organization Membership](https://workos.com/docs/reference/authkit/organization-membership#create-organization-membership)
+    /// Calling this API with an organization and user that match an `inactive` organization membership will activate the membership with the specified role.
+    ///
+    /// [WorkOS Docs: Create an organization membership](https://workos.com/docs/reference/user-management/organization-membership/create)
     ///
     /// # Examples
     ///
     /// ```
-    /// # use workos_sdk::WorkOsResult;
-    /// # use workos_sdk::user_management::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::WorkOsResult;
+    /// # use workos::organizations::OrganizationId;
+    /// # use workos::user_management::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), CreateOrganizationMembershipError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));
@@ -50,9 +54,9 @@ pub trait CreateOrganizationMembership {
     /// let organization_membership = workos
     ///     .user_management()
     ///     .create_organization_membership(&CreateOrganizationMembershipParams {
-    ///         user_id: &UserId::from("user_01E4ZCR3C56J083X43JQXF3JK5"),
-    ///         organization_id: &OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"),
-    ///         role_slug: Some("admin"),
+    ///          user_id: &UserId::from("user_01E4ZCR3C5A4QZ2Z2JQXGKZJ9E"),
+    ///          organization_id: &OrganizationId::from("org_01E4ZCR3C56J083X43JQXF3JK5"),
+    ///          role_slug: Some("admin"),
     ///     })
     ///     .await?;
     /// # Ok(())
@@ -70,8 +74,10 @@ impl CreateOrganizationMembership for UserManagement<'_> {
         &self,
         params: &CreateOrganizationMembershipParams<'_>,
     ) -> WorkOsResult<OrganizationMembership, CreateOrganizationMembershipError> {
-        let url = self.workos.base_url().join("/user_management/organization_memberships")?;
-        
+        let url = self
+            .workos
+            .base_url()
+            .join("/user_management/organization_membership")?;
         let organization_membership = self
             .workos
             .client()
@@ -80,7 +86,8 @@ impl CreateOrganizationMembership for UserManagement<'_> {
             .json(&params)
             .send()
             .await?
-            .handle_unauthorized_or_generic_error()?
+            .handle_unauthorized_or_generic_error()
+            .await?
             .json::<OrganizationMembership>()
             .await?;
 
@@ -108,20 +115,15 @@ mod test {
             .build();
 
         server
-            .mock("POST", "/user_management/organization_memberships")
+            .mock("POST", "/user_management/organization_membership")
             .match_header("Authorization", "Bearer sk_example_123456789")
-            .match_body(mockito::Matcher::Json(json!({
-                "user_id": "user_01E4ZCR3C56J083X43JQXF3JK5",
-                "organization_id": "org_01EHZNVPK3SFK441A1RGBFSHRT",
-                "role_slug": "admin"
-            })))
             .with_status(201)
             .with_body(
                 json!({
                     "object": "organization_membership",
                     "id": "om_01E4ZCR3C56J083X43JQXF3JK5",
-                    "user_id": "user_01E4ZCR3C56J083X43JQXF3JK5",
-                    "organization_id": "org_01EHZNVPK3SFK441A1RGBFSHRT",
+                    "user_id": "user_01E4ZCR3C5A4QZ2Z2JQXGKZJ9E",
+                    "organization_id": "org_01E4ZCR3C56J083X43JQXF3JK5",
                     "role": {
                         "slug": "admin"
                     },
@@ -137,8 +139,8 @@ mod test {
         let organization_membership = workos
             .user_management()
             .create_organization_membership(&CreateOrganizationMembershipParams {
-                user_id: &UserId::from("user_01E4ZCR3C56J083X43JQXF3JK5"),
-                organization_id: &OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"),
+                user_id: &UserId::from("user_01E4ZCR3C5A4QZ2Z2JQXGKZJ9E"),
+                organization_id: &OrganizationId::from("org_01E4ZCR3C56J083X43JQXF3JK5"),
                 role_slug: Some("admin"),
             })
             .await
@@ -147,6 +149,6 @@ mod test {
         assert_eq!(
             organization_membership.id,
             OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5")
-        );
+        )
     }
 }

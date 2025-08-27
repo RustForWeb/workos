@@ -55,7 +55,7 @@ impl GetUserIdentities for UserManagement<'_> {
             .base_url()
             .join(&format!("/user_management/users/{user_id}/identities"))?;
 
-        let users = self
+        let identities = self
             .workos
             .client()
             .get(url)
@@ -67,7 +67,7 @@ impl GetUserIdentities for UserManagement<'_> {
             .json::<Vec<Identity>>()
             .await?;
 
-        Ok(users)
+        Ok(identities)
     }
 }
 

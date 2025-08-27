@@ -1,8 +1,16 @@
 use async_trait::async_trait;
+use serde::Serialize;
 use thiserror::Error;
 
 use crate::user_management::{OrganizationMembershipId, UserManagement};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
+
+/// The parameters for [`DeleteOrganizationMembership`].
+#[derive(Debug, Serialize)]
+pub struct DeleteOrganizationMembershipParams<'a> {
+    /// The unique ID of the organization membership.
+    pub organization_membership_id: &'a OrganizationMembershipId,
+}
 
 /// An error returned from [`DeleteOrganizationMembership`].
 #[derive(Debug, Error)]
@@ -14,33 +22,35 @@ impl From<DeleteOrganizationMembershipError> for WorkOsError<DeleteOrganizationM
     }
 }
 
-/// [WorkOS Docs: Delete Organization Membership](https://workos.com/docs/reference/authkit/organization-membership#delete-organization-membership)
+/// [WorkOS Docs: Delete an organization membership](https://workos.com/docs/reference/user-management/organization-membership/delete)
 #[async_trait]
 pub trait DeleteOrganizationMembership {
-    /// Deletes an [`OrganizationMembership`].
+    /// Permanently deletes an existing organization membership. It cannot be undone.
     ///
-    /// [WorkOS Docs: Delete Organization Membership](https://workos.com/docs/reference/authkit/organization-membership#delete-organization-membership)
+    /// [WorkOS Docs: Delete an organization membership](https://workos.com/docs/reference/user-management/organization-membership/delete)
     ///
     /// # Examples
     ///
     /// ```
-    /// # use workos_sdk::WorkOsResult;
-    /// # use workos_sdk::user_management::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::WorkOsResult;
+    /// # use workos::user_management::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), DeleteOrganizationMembershipError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));
     ///
     /// workos
     ///     .user_management()
-    ///     .delete_organization_membership(&OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5"))
+    ///     .delete_organization_membership(&DeleteOrganizationMembershipParams {
+    ///         organization_membership_id: &OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5"),
+    ///     })
     ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
     async fn delete_organization_membership(
         &self,
-        organization_membership_id: &OrganizationMembershipId,
+        params: &DeleteOrganizationMembershipParams<'_>,
     ) -> WorkOsResult<(), DeleteOrganizationMembershipError>;
 }
 
@@ -48,21 +58,20 @@ pub trait DeleteOrganizationMembership {
 impl DeleteOrganizationMembership for UserManagement<'_> {
     async fn delete_organization_membership(
         &self,
-        organization_membership_id: &OrganizationMembershipId,
+        params: &DeleteOrganizationMembershipParams<'_>,
     ) -> WorkOsResult<(), DeleteOrganizationMembershipError> {
-        let url = self
-            .workos
-            .base_url()
-            .join(&format!("/user_management/organization_memberships/{}", organization_membership_id))?;
-        
-        self
-            .workos
+        let url = self.workos.base_url().join(&format!(
+            "/user_management/users/{id}",
+            id = params.organization_membership_id
+        ))?;
+        self.workos
             .client()
             .delete(url)
             .bearer_auth(self.workos.key())
             .send()
             .await?
-            .handle_unauthorized_or_generic_error()?;
+            .handle_unauthorized_or_generic_error()
+            .await?;
 
         Ok(())
     }
@@ -72,9 +81,9 @@ impl DeleteOrganizationMembership for UserManagement<'_> {
 mod test {
     use tokio;
 
-    use crate::{ApiKey, WorkOs};
-
     use super::*;
+    use crate::{ApiKey, WorkOs};
+    use matches::assert_matches;
 
     #[tokio::test]
     async fn it_calls_the_delete_organization_membership_endpoint() {
@@ -86,16 +95,24 @@ mod test {
             .build();
 
         server
-            .mock("DELETE", "/user_management/organization_memberships/om_01E4ZCR3C56J083X43JQXF3JK5")
+            .mock(
+                "DELETE",
+                "/user_management/users/om_01E4ZCR3C56J083X43JQXF3JK5",
+            )
             .match_header("Authorization", "Bearer sk_example_123456789")
-            .with_status(204)
+            .with_status(202)
             .create_async()
             .await;
 
-        workos
+        let result = workos
             .user_management()
-            .delete_organization_membership(&OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5"))
-            .await
-            .unwrap();
+            .delete_organization_membership(&DeleteOrganizationMembershipParams {
+                organization_membership_id: &OrganizationMembershipId::from(
+                    "om_01E4ZCR3C56J083X43JQXF3JK5",
+                ),
+            })
+            .await;
+
+        assert_matches!(result, Ok(()));
     }
 }

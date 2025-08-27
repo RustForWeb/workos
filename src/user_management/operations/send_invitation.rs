@@ -83,7 +83,7 @@ impl SendInvitation for UserManagement<'_> {
             .workos
             .base_url()
             .join("/user_management/invitations")?;
-        let user = self
+        let invitation = self
             .workos
             .client()
             .post(url)
@@ -96,7 +96,7 @@ impl SendInvitation for UserManagement<'_> {
             .json::<Invitation>()
             .await?;
 
-        Ok(user)
+        Ok(invitation)
     }
 }
 

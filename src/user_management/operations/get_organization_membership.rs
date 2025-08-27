@@ -14,19 +14,19 @@ impl From<GetOrganizationMembershipError> for WorkOsError<GetOrganizationMembers
     }
 }
 
-/// [WorkOS Docs: Get Organization Membership](https://workos.com/docs/reference/authkit/organization-membership#get-organization-membership)
+/// [WorkOS Docs: Get an organization membership](https://workos.com/docs/reference/user-management/organization-membership/get)
 #[async_trait]
 pub trait GetOrganizationMembership {
-    /// Retrieves an [`OrganizationMembership`] by ID.
+    /// Get the details of an existing organization membership.
     ///
-    /// [WorkOS Docs: Get Organization Membership](https://workos.com/docs/reference/authkit/organization-membership#get-organization-membership)
+    /// [WorkOS Docs: Get an organization membership](https://workos.com/docs/reference/user-management/organization-membership/get)
     ///
     /// # Examples
     ///
     /// ```
-    /// # use workos_sdk::WorkOsResult;
-    /// # use workos_sdk::user_management::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::WorkOsResult;
+    /// # use workos::user_management::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), GetOrganizationMembershipError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));
@@ -40,7 +40,7 @@ pub trait GetOrganizationMembership {
     /// ```
     async fn get_organization_membership(
         &self,
-        organization_membership_id: &OrganizationMembershipId,
+        id: &OrganizationMembershipId,
     ) -> WorkOsResult<OrganizationMembership, GetOrganizationMembershipError>;
 }
 
@@ -48,13 +48,12 @@ pub trait GetOrganizationMembership {
 impl GetOrganizationMembership for UserManagement<'_> {
     async fn get_organization_membership(
         &self,
-        organization_membership_id: &OrganizationMembershipId,
+        id: &OrganizationMembershipId,
     ) -> WorkOsResult<OrganizationMembership, GetOrganizationMembershipError> {
         let url = self
             .workos
             .base_url()
-            .join(&format!("/user_management/organization_memberships/{}", organization_membership_id))?;
-        
+            .join(&format!("/user_management/organization_memberships/{id}"))?;
         let organization_membership = self
             .workos
             .client()
@@ -62,7 +61,8 @@ impl GetOrganizationMembership for UserManagement<'_> {
             .bearer_auth(self.workos.key())
             .send()
             .await?
-            .handle_unauthorized_or_generic_error()?
+            .handle_unauthorized_or_generic_error()
+            .await?
             .json::<OrganizationMembership>()
             .await?;
 
@@ -89,17 +89,20 @@ mod test {
             .build();
 
         server
-            .mock("GET", "/user_management/organization_memberships/om_01E4ZCR3C56J083X43JQXF3JK5")
+            .mock(
+                "GET",
+                "/user_management/organization_memberships/om_01E4ZCR3C56J083X43JQXF3JK5",
+            )
             .match_header("Authorization", "Bearer sk_example_123456789")
             .with_status(200)
             .with_body(
                 json!({
                     "object": "organization_membership",
                     "id": "om_01E4ZCR3C56J083X43JQXF3JK5",
-                    "user_id": "user_01E4ZCR3C56J083X43JQXF3JK5",
-                    "organization_id": "org_01EHZNVPK3SFK441A1RGBFSHRT",
+                    "user_id": "user_01E4ZCR3C5A4QZ2Z2JQXGKZJ9E",
+                    "organization_id": "org_01E4ZCR3C56J083X43JQXF3JK5",
                     "role": {
-                        "slug": "admin"
+                        "slug": "member"
                     },
                     "status": "active",
                     "created_at": "2021-06-25T19:07:33.155Z",
@@ -112,13 +115,15 @@ mod test {
 
         let organization_membership = workos
             .user_management()
-            .get_organization_membership(&OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5"))
+            .get_organization_membership(&OrganizationMembershipId::from(
+                "om_01E4ZCR3C56J083X43JQXF3JK5",
+            ))
             .await
             .unwrap();
 
         assert_eq!(
             organization_membership.id,
             OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5")
-        );
+        )
     }
 }

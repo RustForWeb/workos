@@ -72,7 +72,7 @@ impl ListAuthFactors for UserManagement<'_> {
             params.id
         ))?;
 
-        let organizations = self
+        let auth_factors = self
             .workos
             .client()
             .get(url)
@@ -85,7 +85,7 @@ impl ListAuthFactors for UserManagement<'_> {
             .json::<PaginatedList<AuthenticationFactor>>()
             .await?;
 
-        Ok(organizations)
+        Ok(auth_factors)
     }
 }
 

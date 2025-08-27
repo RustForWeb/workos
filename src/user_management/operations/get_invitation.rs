@@ -54,7 +54,7 @@ impl GetInvitation for UserManagement<'_> {
             .workos
             .base_url()
             .join(&format!("/user_management/invitations/{id}"))?;
-        let organization = self
+        let invitation = self
             .workos
             .client()
             .get(url)
@@ -66,7 +66,7 @@ impl GetInvitation for UserManagement<'_> {
             .json::<Invitation>()
             .await?;
 
-        Ok(organization)
+        Ok(invitation)
     }
 }
 

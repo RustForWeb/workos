@@ -54,7 +54,7 @@ impl FindInvitationByToken for UserManagement<'_> {
             .workos
             .base_url()
             .join(&format!("/user_management/invitations/by_token/{token}"))?;
-        let organization = self
+        let invitation = self
             .workos
             .client()
             .get(url)
@@ -66,7 +66,7 @@ impl FindInvitationByToken for UserManagement<'_> {
             .json::<Invitation>()
             .await?;
 
-        Ok(organization)
+        Ok(invitation)
     }
 }
 

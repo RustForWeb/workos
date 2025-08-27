@@ -54,7 +54,7 @@ impl GetPasswordReset for UserManagement<'_> {
             .workos
             .base_url()
             .join(&format!("/user_management/password_reset/{id}"))?;
-        let organization = self
+        let password_reset = self
             .workos
             .client()
             .get(url)
@@ -66,7 +66,7 @@ impl GetPasswordReset for UserManagement<'_> {
             .json::<PasswordReset>()
             .await?;
 
-        Ok(organization)
+        Ok(password_reset)
     }
 }
 

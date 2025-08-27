@@ -31,7 +31,7 @@ pub trait GetEmailVerification {
     /// # async fn run() -> WorkOsResult<(), GetEmailVerificationError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));
     ///
-    /// let organization = workos
+    /// let email_verification = workos
     ///     .user_management()
     ///     .get_email_verification(&EmailVerificationId::from("email_verification_01HYGGEB6FYMWQNWF3XDZG7VV3"))
     ///     .await?;
@@ -54,7 +54,7 @@ impl GetEmailVerification for UserManagement<'_> {
             .workos
             .base_url()
             .join(&format!("/user_management/email_verification/{id}"))?;
-        let organization = self
+        let email_verification = self
             .workos
             .client()
             .get(url)
@@ -66,7 +66,7 @@ impl GetEmailVerification for UserManagement<'_> {
             .json::<EmailVerification>()
             .await?;
 
-        Ok(organization)
+        Ok(email_verification)
     }
 }
 

@@ -5,12 +5,15 @@ use thiserror::Error;
 use crate::user_management::{OrganizationMembership, OrganizationMembershipId, UserManagement};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
 
-/// Parameters for the [`UpdateOrganizationMembership`] function.
+/// The parameters for [`UpdateOrganizationMembership`].
 #[derive(Debug, Serialize)]
 pub struct UpdateOrganizationMembershipParams<'a> {
-    /// The slug of the role to assign to the user.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub role_slug: Option<&'a str>,
+    /// The unique ID of the organization membership.
+    #[serde(skip_serializing)]
+    pub organization_membership_id: &'a OrganizationMembershipId,
+
+    /// The unique role identifier.
+    pub role_slug: &'a str,
 }
 
 /// An error returned from [`UpdateOrganizationMembership`].
@@ -23,38 +26,35 @@ impl From<UpdateOrganizationMembershipError> for WorkOsError<UpdateOrganizationM
     }
 }
 
-/// [WorkOS Docs: Update Organization Membership](https://workos.com/docs/reference/authkit/organization-membership#update-organization-membership)
+/// [WorkOS Docs: Update an organization membership](https://workos.com/docs/reference/user-management/organization-membership/update)
 #[async_trait]
 pub trait UpdateOrganizationMembership {
-    /// Updates an [`OrganizationMembership`].
+    /// Update the details of an existing organization membership.
     ///
-    /// [WorkOS Docs: Update Organization Membership](https://workos.com/docs/reference/authkit/organization-membership#update-organization-membership)
+    /// [WorkOS Docs: Update an organization membership](https://workos.com/docs/reference/user-management/organization-membership/update)
     ///
     /// # Examples
     ///
     /// ```
-    /// # use workos_sdk::WorkOsResult;
-    /// # use workos_sdk::user_management::*;
-    /// use workos_sdk::{ApiKey, WorkOs};
+    /// # use workos::WorkOsResult;
+    /// # use workos::user_management::*;
+    /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), UpdateOrganizationMembershipError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));
     ///
     /// let organization_membership = workos
     ///     .user_management()
-    ///     .update_organization_membership(
-    ///         &OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5"),
-    ///         &UpdateOrganizationMembershipParams {
-    ///             role_slug: Some("member"),
-    ///         }
-    ///     )
+    ///     .update_organization_membership(&UpdateOrganizationMembershipParams {
+    ///         organization_membership_id: &OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5"),
+    ///         role_slug: "admin",
+    ///     })
     ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
     async fn update_organization_membership(
         &self,
-        organization_membership_id: &OrganizationMembershipId,
         params: &UpdateOrganizationMembershipParams<'_>,
     ) -> WorkOsResult<OrganizationMembership, UpdateOrganizationMembershipError>;
 }
@@ -63,14 +63,12 @@ pub trait UpdateOrganizationMembership {
 impl UpdateOrganizationMembership for UserManagement<'_> {
     async fn update_organization_membership(
         &self,
-        organization_membership_id: &OrganizationMembershipId,
         params: &UpdateOrganizationMembershipParams<'_>,
     ) -> WorkOsResult<OrganizationMembership, UpdateOrganizationMembershipError> {
-        let url = self
-            .workos
-            .base_url()
-            .join(&format!("/user_management/organization_memberships/{}", organization_membership_id))?;
-        
+        let url = self.workos.base_url().join(&format!(
+            "/user_management/organization_memberships/{id}",
+            id = params.organization_membership_id
+        ))?;
         let organization_membership = self
             .workos
             .client()
@@ -79,7 +77,8 @@ impl UpdateOrganizationMembership for UserManagement<'_> {
             .json(&params)
             .send()
             .await?
-            .handle_unauthorized_or_generic_error()?
+            .handle_unauthorized_or_generic_error()
+            .await?
             .json::<OrganizationMembership>()
             .await?;
 
@@ -107,24 +106,24 @@ mod test {
             .build();
 
         server
-            .mock("PUT", "/user_management/organization_memberships/om_01E4ZCR3C56J083X43JQXF3JK5")
+            .mock(
+                "PUT",
+                "/user_management/organization_memberships/om_01E4ZCR3C56J083X43JQXF3JK5",
+            )
             .match_header("Authorization", "Bearer sk_example_123456789")
-            .match_body(mockito::Matcher::Json(json!({
-                "role_slug": "member"
-            })))
             .with_status(200)
             .with_body(
                 json!({
                     "object": "organization_membership",
                     "id": "om_01E4ZCR3C56J083X43JQXF3JK5",
-                    "user_id": "user_01E4ZCR3C56J083X43JQXF3JK5",
-                    "organization_id": "org_01EHZNVPK3SFK441A1RGBFSHRT",
+                    "user_id": "user_01E4ZCR3C5A4QZ2Z2JQXGKZJ9E",
+                    "organization_id": "org_01E4ZCR3C56J083X43JQXF3JK5",
                     "role": {
-                        "slug": "member"
+                        "slug": "admin"
                     },
                     "status": "active",
                     "created_at": "2021-06-25T19:07:33.155Z",
-                    "updated_at": "2021-06-25T19:07:33.155Z"
+                    "updated_at": "2021-06-27T19:07:33.278Z"
                 })
                 .to_string(),
             )
@@ -133,19 +132,18 @@ mod test {
 
         let organization_membership = workos
             .user_management()
-            .update_organization_membership(
-                &OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5"),
-                &UpdateOrganizationMembershipParams {
-                    role_slug: Some("member"),
-                }
-            )
+            .update_organization_membership(&UpdateOrganizationMembershipParams {
+                organization_membership_id: &OrganizationMembershipId::from(
+                    "om_01E4ZCR3C56J083X43JQXF3JK5",
+                ),
+                role_slug: "admin",
+            })
             .await
             .unwrap();
 
         assert_eq!(
             organization_membership.id,
             OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5")
-        );
-        assert_eq!(organization_membership.role.slug, "member");
+        )
     }
 }

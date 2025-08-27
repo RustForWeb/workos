@@ -65,7 +65,7 @@ impl CreateMagicAuth for UserManagement<'_> {
         params: &CreateMagicAuthParams<'_>,
     ) -> WorkOsResult<MagicAuth, CreateMagicAuthError> {
         let url = self.workos.base_url().join("/user_management/magic_auth")?;
-        let user = self
+        let magic_auth = self
             .workos
             .client()
             .post(url)
@@ -78,7 +78,7 @@ impl CreateMagicAuth for UserManagement<'_> {
             .json::<MagicAuth>()
             .await?;
 
-        Ok(user)
+        Ok(magic_auth)
     }
 }
 

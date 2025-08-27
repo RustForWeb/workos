@@ -53,7 +53,7 @@ impl RevokeInvitation for UserManagement<'_> {
         let url = self.workos.base_url().join(&format!(
             "/user_management/invitations/{invitation_id}/revoke"
         ))?;
-        let user = self
+        let invitation = self
             .workos
             .client()
             .post(url)
@@ -65,7 +65,7 @@ impl RevokeInvitation for UserManagement<'_> {
             .json::<Invitation>()
             .await?;
 
-        Ok(user)
+        Ok(invitation)
     }
 }
 
