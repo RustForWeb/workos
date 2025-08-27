@@ -1,6 +1,6 @@
 use reqwest::{Response, StatusCode};
 
-use crate::{WorkOsError, WorkOsResult};
+use crate::{JsonOrText, WorkOsError, WorkOsResult};
 
 pub trait ResponseExt
 where
@@ -37,12 +37,18 @@ impl ResponseExt for Response {
                 .is_some_and(|value| value.to_lowercase().starts_with("application/json"))
             {
                 match self.json().await {
-                    Ok(value) => Err(WorkOsError::ApiError(value)),
+                    Ok(value) => Err(WorkOsError::Unknown {
+                        status,
+                        body: JsonOrText::Json(value),
+                    }),
                     Err(err) => Err(WorkOsError::RequestError(err)),
                 }
             } else {
-                match self.error_for_status() {
-                    Ok(response) => Ok(response),
+                match self.text().await {
+                    Ok(text) => Err(WorkOsError::Unknown {
+                        status,
+                        body: JsonOrText::Text(text),
+                    }),
                     Err(err) => Err(WorkOsError::RequestError(err)),
                 }
             }

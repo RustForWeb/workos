@@ -1,5 +1,15 @@
 use thiserror::Error;
 
+/// A JSON or text body.
+#[derive(Clone, Debug)]
+pub enum JsonOrText {
+    /// JSON body.
+    Json(serde_json::Value),
+
+    /// Text body.
+    Text(String),
+}
+
 /// A WorkOS SDK error.
 #[derive(Debug, Error)]
 pub enum WorkOsError<E> {
@@ -10,6 +20,16 @@ pub enum WorkOsError<E> {
     /// An unauthorized response was received from the WorkOS API.
     #[error("unauthorized")]
     Unauthorized,
+
+    /// An unknown error response was received from the WorkOS API.
+    #[error("unknown error")]
+    Unknown {
+        /// The response status code.
+        status: reqwest::StatusCode,
+
+        /// The response body.
+        body: JsonOrText,
+    },
 
     /// An error occurred while parsing a URL.
     #[error("URL parse error")]
@@ -22,10 +42,6 @@ pub enum WorkOsError<E> {
     /// An unhandled error occurred with the API request.
     #[error("request error")]
     RequestError(#[from] reqwest::Error),
-
-    /// The API responded with an error.
-    #[error("API error")]
-    ApiError(serde_json::Value),
 }
 
 /// A WorkOS SDK result.

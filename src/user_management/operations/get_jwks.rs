@@ -63,10 +63,11 @@ impl GetJwks for UserManagement<'_> {
 #[cfg(test)]
 mod test {
     use matches::assert_matches;
+    use reqwest::StatusCode;
     use serde_json::json;
     use tokio;
 
-    use crate::{ApiKey, WorkOs, WorkOsError};
+    use crate::{ApiKey, JsonOrText, WorkOs, WorkOsError};
 
     use super::*;
 
@@ -112,6 +113,7 @@ mod test {
         server
             .mock("GET", "/sso/jwks/client_123456789")
             .with_status(404)
+            .with_header("content-type", "application/json")
             .with_body(
                 json!({
                     "message": "Not Found"
@@ -126,6 +128,14 @@ mod test {
             .get_jwks(&ClientId::from("client_123456789"))
             .await;
 
-        assert_matches!(result, Err(WorkOsError::RequestError(_)))
+        assert_matches!(
+            result,
+            Err(WorkOsError::Unknown {
+                status: StatusCode::NOT_FOUND,
+                body: JsonOrText::Json(json)
+            }) if json == json!({
+                "message": "Not Found"
+            })
+        )
     }
 }
