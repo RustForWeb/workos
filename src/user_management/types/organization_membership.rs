@@ -2,7 +2,7 @@ use derive_more::{Deref, Display, From};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    KnownOrUnknown, Timestamps, organizations::OrganizationId, roles::RoleSlug,
+    KnownOrUnknown, Timestamps, organizations::OrganizationId, roles::RoleSlugObject,
     user_management::UserId,
 };
 
@@ -40,7 +40,7 @@ pub struct OrganizationMembership {
     pub organization_id: OrganizationId,
 
     /// The role of the user.
-    pub role: RoleSlug,
+    pub role: RoleSlugObject,
 
     /// The status of the organization membership.
     pub status: KnownOrUnknown<OrganizationMembershipStatus, String>,

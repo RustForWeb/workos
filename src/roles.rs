@@ -5,7 +5,7 @@
 mod operations;
 mod types;
 
-// pub use operations::*;
+pub use operations::*;
 pub use types::*;
 
 use crate::WorkOs;
@@ -14,7 +14,6 @@ use crate::WorkOs;
 ///
 /// [WorkOS Docs: Roles](https://workos.com/docs/roles)
 pub struct Roles<'a> {
-    #[expect(dead_code)]
     workos: &'a WorkOs,
 }
 
