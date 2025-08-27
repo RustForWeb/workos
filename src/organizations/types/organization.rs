@@ -1,7 +1,7 @@
 use derive_more::{Deref, Display, From};
 use serde::{Deserialize, Serialize};
 
-use crate::{Timestamps, organizations::OrganizationDomain};
+use crate::{Metadata, Timestamps, organizations::OrganizationDomain};
 
 /// The ID of an [`Organization`].
 #[derive(
@@ -13,20 +13,20 @@ pub struct OrganizationId(String);
 /// The ID and name of an [`Organization`].
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct OrganizationIdAndName {
-    /// The ID of the organization.
+    /// Unique identifier of the organization.
     pub id: OrganizationId,
 
-    /// The name of the organization.
+    /// A descriptive name for the organization.
     pub name: String,
 }
 
 /// [WorkOS Docs: Organization](https://workos.com/docs/reference/organization)
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Organization {
-    /// The ID of the organization.
+    /// Unique identifier of the organization.
     pub id: OrganizationId,
 
-    /// The name of the organization.
+    /// A descriptive name for the organization.
     pub name: String,
 
     /// Whether the connections within this organization should allow profiles
@@ -37,8 +37,17 @@ pub struct Organization {
     /// for more details.
     pub allow_profiles_outside_organization: bool,
 
-    /// The list of user email domains for the organization.
+    /// List of organization domains.
     pub domains: Vec<OrganizationDomain>,
+
+    /// The Strip customer ID associated with this organization.
+    pub stripe_customer_id: Option<String>,
+
+    /// The external ID of the organization.
+    pub external_id: Option<String>,
+
+    /// Object containing metadata key/value pairs associated with the organization.
+    pub metadata: Option<Metadata>,
 
     /// The timestamps for the organization.
     #[serde(flatten)]
