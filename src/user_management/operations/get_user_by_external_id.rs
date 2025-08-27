@@ -50,10 +50,13 @@ impl GetUserByExternalId for UserManagement<'_> {
         &self,
         external_id: &str,
     ) -> WorkOsResult<User, GetUserByExternalIdError> {
+        let external_id = urlencoding::encode(external_id);
+
         let url = self
             .workos
             .base_url()
             .join(&format!("/user_management/users/external_id/{external_id}"))?;
+
         let user = self
             .workos
             .client()
@@ -80,7 +83,7 @@ mod test {
     use super::*;
 
     #[tokio::test]
-    async fn it_calls_the_get_user_endpoint() {
+    async fn it_calls_the_get_user_by_external_id_endpoint() {
         let mut server = mockito::Server::new_async().await;
 
         let workos = WorkOs::builder(&ApiKey::from("sk_example_123456789"))

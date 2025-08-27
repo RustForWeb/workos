@@ -50,6 +50,8 @@ impl GetOrganizationByExternalId for Organizations<'_> {
         &self,
         external_id: &str,
     ) -> WorkOsResult<Organization, GetOrganizationByExternalIdError> {
+        let external_id = urlencoding::encode(external_id);
+
         let url = self
             .workos
             .base_url()
