@@ -2,6 +2,7 @@ use async_trait::async_trait;
 use serde::Serialize;
 use thiserror::Error;
 
+use crate::roles::RoleSlug;
 use crate::user_management::{OrganizationMembership, OrganizationMembershipId, UserManagement};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
 
@@ -13,7 +14,7 @@ pub struct UpdateOrganizationMembershipParams<'a> {
     pub organization_membership_id: &'a OrganizationMembershipId,
 
     /// The unique role identifier.
-    pub role_slug: &'a str,
+    pub role_slug: &'a RoleSlug,
 }
 
 /// An error returned from [`UpdateOrganizationMembership`].
@@ -37,6 +38,7 @@ pub trait UpdateOrganizationMembership {
     ///
     /// ```
     /// # use workos::WorkOsResult;
+    /// # use workos::roles::RoleSlug;
     /// # use workos::user_management::*;
     /// use workos::{ApiKey, WorkOs};
     ///
@@ -47,7 +49,7 @@ pub trait UpdateOrganizationMembership {
     ///     .user_management()
     ///     .update_organization_membership(&UpdateOrganizationMembershipParams {
     ///         organization_membership_id: &OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5"),
-    ///         role_slug: "admin",
+    ///         role_slug: &RoleSlug::from("admin"),
     ///     })
     ///     .await?;
     /// # Ok(())
@@ -136,7 +138,7 @@ mod test {
                 organization_membership_id: &OrganizationMembershipId::from(
                     "om_01E4ZCR3C56J083X43JQXF3JK5",
                 ),
-                role_slug: "admin",
+                role_slug: &RoleSlug::from("admin"),
             })
             .await
             .unwrap();

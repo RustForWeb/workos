@@ -3,6 +3,7 @@ use serde::Serialize;
 use thiserror::Error;
 
 use crate::organizations::OrganizationId;
+use crate::roles::RoleSlug;
 use crate::user_management::{OrganizationMembership, UserId, UserManagement};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
 
@@ -18,7 +19,7 @@ pub struct CreateOrganizationMembershipParams<'a> {
     /// The unique role identifier.
     ///
     /// Defaults to `member`.
-    pub role_slug: Option<&'a str>,
+    pub role_slug: Option<&'a RoleSlug>,
 }
 
 /// An error returned from [`CreateOrganizationMembership`].
@@ -45,6 +46,7 @@ pub trait CreateOrganizationMembership {
     /// ```
     /// # use workos::WorkOsResult;
     /// # use workos::organizations::OrganizationId;
+    /// # use workos::roles::RoleSlug;
     /// # use workos::user_management::*;
     /// use workos::{ApiKey, WorkOs};
     ///
@@ -56,7 +58,7 @@ pub trait CreateOrganizationMembership {
     ///     .create_organization_membership(&CreateOrganizationMembershipParams {
     ///          user_id: &UserId::from("user_01E4ZCR3C5A4QZ2Z2JQXGKZJ9E"),
     ///          organization_id: &OrganizationId::from("org_01E4ZCR3C56J083X43JQXF3JK5"),
-    ///          role_slug: Some("admin"),
+    ///          role_slug: Some(&RoleSlug::from("admin")),
     ///     })
     ///     .await?;
     /// # Ok(())
@@ -141,7 +143,7 @@ mod test {
             .create_organization_membership(&CreateOrganizationMembershipParams {
                 user_id: &UserId::from("user_01E4ZCR3C5A4QZ2Z2JQXGKZJ9E"),
                 organization_id: &OrganizationId::from("org_01E4ZCR3C56J083X43JQXF3JK5"),
-                role_slug: Some("admin"),
+                role_slug: Some(&RoleSlug::from("admin")),
             })
             .await
             .unwrap();

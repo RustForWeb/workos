@@ -3,6 +3,7 @@ use serde::Serialize;
 use thiserror::Error;
 
 use crate::organizations::OrganizationId;
+use crate::roles::RoleSlug;
 use crate::user_management::{Invitation, UserId, UserManagement};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
 
@@ -24,7 +25,7 @@ pub struct SendInvitationParams<'a> {
     pub inviter_user_id: Option<&'a UserId>,
 
     /// The role that the recipient will receive when they join the organization in the invitation.
-    pub role_slug: Option<&'a str>,
+    pub role_slug: Option<&'a RoleSlug>,
 }
 
 /// An error returned from [`SendInvitation`].
