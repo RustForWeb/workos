@@ -5,7 +5,6 @@ use crate::directory_sync::DirectorySync;
 use crate::events::Events;
 use crate::mfa::Mfa;
 use crate::organizations::Organizations;
-use crate::passwordless::Passwordless;
 use crate::portal::Portal;
 use crate::roles::Roles;
 use crate::sso::Sso;
@@ -60,11 +59,6 @@ impl WorkOs {
     /// Returns an [`Organizations`] instance.
     pub fn organizations(&self) -> Organizations<'_> {
         Organizations::new(self)
-    }
-
-    /// Returns a [`Passwordless`] instance.
-    pub fn passwordless(&self) -> Passwordless<'_> {
-        Passwordless::new(self)
     }
 
     /// Returns an [`AdminPortal`] instance.

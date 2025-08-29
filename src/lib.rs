@@ -10,7 +10,6 @@ pub mod directory_sync;
 pub mod events;
 pub mod mfa;
 pub mod organizations;
-pub mod passwordless;
 pub mod portal;
 pub mod roles;
 pub mod sso;
