@@ -1,54 +1,33 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-use crate::admin_portal::AdminPortal;
 use crate::organizations::OrganizationId;
+use crate::portal::{GeneratePortalLinkIntent, Portal};
 use crate::{ResponseExt, WorkOsResult};
-
-/// The intent of an Admin Portal session.
-#[derive(Clone, Copy, Debug, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum AdminPortalIntent {
-    /// The Admin Portal will be used to setup Single Sign-On (SSO).
-    Sso,
-
-    /// The Admin Portal wil be used to setup Directory Sync.
-    #[serde(rename = "dsync")]
-    DirectorySync,
-}
-
-/// The target of the Admin Portal.
-#[derive(Debug, Serialize)]
-#[serde(untagged, rename_all = "snake_case")]
-pub enum AdminPortalTarget {
-    /// The Admin Portal session should target an organization.
-    Organization {
-        /// The ID of the organization.
-        #[serde(rename = "organization")]
-        organization_id: OrganizationId,
-
-        /// The intent of the Admin Portal session.
-        intent: AdminPortalIntent,
-    },
-}
 
 /// The parameters for [`GeneratePortalLink`].
 #[derive(Debug, Serialize)]
 pub struct GeneratePortalLinkParams<'a> {
-    /// The target of the Admin Portal.
-    #[serde(flatten)]
-    pub target: &'a AdminPortalTarget,
+    /// The ID of the organization.
+    #[serde(rename = "organization")]
+    pub organization_id: &'a OrganizationId,
 
-    /// The URL to which the Admin Portal should send users when they click on the link
-    /// to return to your application.
+    /// The intent of the Admin Portal.
+    pub intent: GeneratePortalLinkIntent,
+
+    /// The URL to go to when an admin clicks on your logo in the Admin Portal.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub return_url: Option<String>,
+    pub return_url: Option<&'a str>,
+
+    /// The URL to redirect the admin to when they finish setup.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub success_url: Option<&'a str>,
 }
 
 /// The response for [`GeneratePortalLink`].
 #[derive(Debug, Deserialize)]
 pub struct GeneratePortalLinkResponse {
-    /// The generate Admin Portal link.
+    /// An ephemeral link to initiate the Admin Portal.
     pub link: String,
 }
 
@@ -59,7 +38,7 @@ pub enum GeneratePortalLinkError {}
 /// [WorkOS Docs: Generate a Portal Link](https://workos.com/docs/reference/admin-portal/portal-link/generate)
 #[async_trait]
 pub trait GeneratePortalLink {
-    /// Generates an Admin Portal link.
+    /// Generate a Portal Link scoped to an Organization.
     ///
     /// [WorkOS Docs: Generate a Portal Link](https://workos.com/docs/reference/admin-portal/portal-link/generate)
     ///
@@ -67,21 +46,20 @@ pub trait GeneratePortalLink {
     ///
     /// ```
     /// # use workos::WorkOsResult;
-    /// # use workos::admin_portal::*;
     /// # use workos::organizations::OrganizationId;
+    /// # use workos::portal::*;
     /// use workos::{ApiKey, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), GeneratePortalLinkError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));
     ///
     /// let GeneratePortalLinkResponse { link } = workos
-    ///     .admin_portal()
+    ///     .portal()
     ///     .generate_portal_link(&GeneratePortalLinkParams {
-    ///         target: &AdminPortalTarget::Organization {
-    ///             organization_id: OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"),
-    ///             intent: AdminPortalIntent::Sso,
-    ///         },
+    ///         organization_id: &OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"),
+    ///         intent: GeneratePortalLinkIntent::Sso,
     ///         return_url: None,
+    ///         success_url: None,
     ///     })
     ///     .await?;
     /// # Ok(())
@@ -94,13 +72,13 @@ pub trait GeneratePortalLink {
 }
 
 #[async_trait]
-impl GeneratePortalLink for AdminPortal<'_> {
+impl GeneratePortalLink for Portal<'_> {
     async fn generate_portal_link(
         &self,
         params: &GeneratePortalLinkParams<'_>,
     ) -> WorkOsResult<GeneratePortalLinkResponse, GeneratePortalLinkError> {
         let url = self.workos.base_url().join("/portal/generate_link")?;
-        let generate_link_response = self
+        let response = self
             .workos
             .client()
             .post(url)
@@ -113,12 +91,13 @@ impl GeneratePortalLink for AdminPortal<'_> {
             .json::<GeneratePortalLinkResponse>()
             .await?;
 
-        Ok(generate_link_response)
+        Ok(response)
     }
 }
 
 #[cfg(test)]
 mod test {
+    use mockito::Matcher;
     use serde_json::json;
     use tokio;
 
@@ -136,33 +115,34 @@ mod test {
             .unwrap()
             .build();
 
-        server.mock("POST", "/portal/generate_link")
+        server
+            .mock("POST", "/portal/generate_link")
             .match_header("Authorization", "Bearer sk_example_123456789")
-            .match_body(r#"{"organization":"org_01EHZNVPK3SFK441A1RGBFSHRT","intent":"sso"}"#)
+            .match_body(Matcher::Json(json!({
+                "organization": "org_01EHZNVPK3SFK441A1RGBFSHRT",
+                "intent": "sso",
+            })))
             .with_status(201)
             .with_body(
                 json!({
-                    "link": "https://setup.workos.com/portal/launch?secret=JteZqfJZqUcgWGaYCC6iI0gW0"
+                    "link": "https://setup.workos.com?token=token"
                 })
                 .to_string(),
             )
-            .create_async().await;
+            .create_async()
+            .await;
 
         let GeneratePortalLinkResponse { link } = workos
-            .admin_portal()
+            .portal()
             .generate_portal_link(&GeneratePortalLinkParams {
-                target: &AdminPortalTarget::Organization {
-                    organization_id: OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"),
-                    intent: AdminPortalIntent::Sso,
-                },
+                organization_id: &OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"),
+                intent: GeneratePortalLinkIntent::Sso,
                 return_url: None,
+                success_url: None,
             })
             .await
             .unwrap();
 
-        assert_eq!(
-            link,
-            "https://setup.workos.com/portal/launch?secret=JteZqfJZqUcgWGaYCC6iI0gW0".to_string()
-        )
+        assert_eq!(link, "https://setup.workos.com?token=token".to_string())
     }
 }

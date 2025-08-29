@@ -1,12 +1,12 @@
 use url::{ParseError, Url};
 
 use crate::ApiKey;
-use crate::admin_portal::AdminPortal;
 use crate::directory_sync::DirectorySync;
 use crate::events::Events;
 use crate::mfa::Mfa;
 use crate::organizations::Organizations;
 use crate::passwordless::Passwordless;
+use crate::portal::Portal;
 use crate::roles::Roles;
 use crate::sso::Sso;
 use crate::user_management::UserManagement;
@@ -42,11 +42,6 @@ impl WorkOs {
         &self.client
     }
 
-    /// Returns an [`AdminPortal`] instance.
-    pub fn admin_portal(&self) -> AdminPortal<'_> {
-        AdminPortal::new(self)
-    }
-
     /// Returns a [`DirectorySync`] instance.
     pub fn directory_sync(&self) -> DirectorySync<'_> {
         DirectorySync::new(self)
@@ -70,6 +65,11 @@ impl WorkOs {
     /// Returns a [`Passwordless`] instance.
     pub fn passwordless(&self) -> Passwordless<'_> {
         Passwordless::new(self)
+    }
+
+    /// Returns an [`AdminPortal`] instance.
+    pub fn portal(&self) -> Portal<'_> {
+        Portal::new(self)
     }
 
     /// Returns an [`Roles`] instance.
