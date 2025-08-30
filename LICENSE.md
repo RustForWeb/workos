@@ -1,6 +1,7 @@
 MIT License
 
 Copyright (c) 2025 Rust for Web
+
 Copyright (c) 2022 WorkOS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
