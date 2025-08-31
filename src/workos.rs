@@ -10,6 +10,7 @@ use crate::portal::Portal;
 use crate::roles::Roles;
 use crate::sso::Sso;
 use crate::user_management::UserManagement;
+use crate::widgets::Widgets;
 
 /// The WorkOS client.
 #[derive(Clone)]
@@ -85,6 +86,11 @@ impl WorkOs {
     /// Returns a [`UserManagement`] instance.
     pub fn user_management(&self) -> UserManagement<'_> {
         UserManagement::new(self)
+    }
+
+    /// Returns an [`Widgets`] instance.
+    pub fn widgets(&self) -> Widgets<'_> {
+        Widgets::new(self)
     }
 }
 

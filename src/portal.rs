@@ -18,7 +18,7 @@ pub struct Portal<'a> {
 }
 
 impl<'a> Portal<'a> {
-    /// Returns a new [`AdminPortal`] instance for the provided WorkOS client.
+    /// Returns a new [`Portal`] instance for the provided WorkOS client.
     pub fn new(workos: &'a WorkOs) -> Self {
         Self { workos }
     }

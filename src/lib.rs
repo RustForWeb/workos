@@ -15,6 +15,7 @@ pub mod portal;
 pub mod roles;
 pub mod sso;
 pub mod user_management;
+pub mod widgets;
 
 pub use crate::core::*;
 pub use crate::workos::*;
