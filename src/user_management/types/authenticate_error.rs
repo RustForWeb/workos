@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use reqwest::{Response, StatusCode};
-use serde::Deserialize;
+use serde::{Deserialize, de::DeserializeOwned};
 use thiserror::Error;
 
 use crate::{
@@ -9,6 +9,12 @@ use crate::{
 };
 
 use super::{AuthenticateMethods, EmailVerificationId, PendingAuthenticationToken, User};
+
+/// Whether an error is an unauthorized error.
+pub trait IsUnauthorized {
+    /// Whether an error is an unauthorized error.
+    fn is_unauthorized(&self) -> bool;
+}
 
 /// An error returned from authenticate requests.
 #[derive(Debug, Deserialize, Error)]
@@ -20,6 +26,17 @@ pub enum AuthenticateError {
 
     /// Error tagged with an `error` field.
     WithError(AuthenticateErrorWithError),
+}
+
+impl IsUnauthorized for AuthenticateError {
+    fn is_unauthorized(&self) -> bool {
+        match &self {
+            AuthenticateError::WithError(AuthenticateErrorWithError::Other { error, .. }) => {
+                matches!(error.as_str(), "invalid_client" | "unauthorized_client")
+            }
+            _ => false,
+        }
+    }
 }
 
 /// An error returned from authenticate requests tagged with a `code` field.
@@ -273,37 +290,40 @@ impl AuthenticateErrorWithError {
 }
 
 #[async_trait]
-pub(crate) trait HandleAuthenticateError
+pub(crate) trait HandleAuthenticateError<E>
 where
     Self: Sized,
+    E: DeserializeOwned + IsUnauthorized,
 {
-    async fn handle_authenticate_error(self) -> WorkOsResult<Self, AuthenticateError>;
+    async fn handle_authenticate_error(self) -> WorkOsResult<Self, E>;
 }
 
 #[async_trait]
-impl HandleAuthenticateError for Response {
-    async fn handle_authenticate_error(self) -> WorkOsResult<Self, AuthenticateError> {
+impl<E> HandleAuthenticateError<E> for Response
+where
+    E: DeserializeOwned + IsUnauthorized,
+{
+    async fn handle_authenticate_error(self) -> WorkOsResult<Self, E> {
         match self.error_for_status_ref() {
             Ok(_) => Ok(self),
             Err(err) => match err.status() {
                 Some(StatusCode::BAD_REQUEST) => {
-                    let authenticate_error = self.json::<AuthenticateError>().await?;
+                    let authenticate_error = self.json::<E>().await?;
 
-                    Err(match &authenticate_error {
-                        AuthenticateError::WithError(AuthenticateErrorWithError::Other {
-                            error,
-                            ..
-                        }) => match error.as_str() {
-                            "invalid_client" | "unauthorized_client" => WorkOsError::Unauthorized,
-                            _ => WorkOsError::Operation(authenticate_error),
-                        },
-                        _ => WorkOsError::Operation(authenticate_error),
+                    Err(if authenticate_error.is_unauthorized() {
+                        WorkOsError::Unauthorized
+                    } else {
+                        WorkOsError::Operation(authenticate_error)
                     })
                 }
                 Some(StatusCode::FORBIDDEN) => {
-                    let authenticate_error = self.json::<AuthenticateError>().await?;
+                    let authenticate_error = self.json::<E>().await?;
 
-                    Err(WorkOsError::Operation(authenticate_error))
+                    Err(if authenticate_error.is_unauthorized() {
+                        WorkOsError::Unauthorized
+                    } else {
+                        WorkOsError::Operation(authenticate_error)
+                    })
                 }
                 _ => Err(WorkOsError::RequestError(err)),
             },
