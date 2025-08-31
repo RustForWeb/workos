@@ -9,6 +9,7 @@ mod workos;
 pub mod directory_sync;
 pub mod events;
 pub mod mfa;
+pub mod organization_domains;
 pub mod organizations;
 pub mod portal;
 pub mod roles;

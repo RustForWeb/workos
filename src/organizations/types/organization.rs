@@ -1,7 +1,7 @@
 use derive_more::{Deref, Display, From};
 use serde::{Deserialize, Serialize};
 
-use crate::{Metadata, Timestamps, organizations::OrganizationDomain};
+use crate::{Metadata, Timestamps, organization_domains::OrganizationDomain};
 
 /// The ID of an [`Organization`].
 #[derive(

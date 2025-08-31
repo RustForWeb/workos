@@ -1,6 +1,6 @@
 //! A module for interacting with the WorkOS Roles API.
 //!
-//! [WorkOS Docs: Roles](https://workos.com/docs/roles)
+//! [WorkOS Docs: Role-Based Access Control Guide](https://workos.com/docs/rbac/guide)
 
 mod operations;
 mod types;
@@ -12,7 +12,7 @@ use crate::WorkOs;
 
 /// Roles.
 ///
-/// [WorkOS Docs: Roles](https://workos.com/docs/roles)
+/// [WorkOS Docs: Role-Based Access Control Guide](https://workos.com/docs/rbac/guide)
 pub struct Roles<'a> {
     workos: &'a WorkOs,
 }

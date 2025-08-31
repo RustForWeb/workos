@@ -8,7 +8,7 @@ use crate::{Metadata, ResponseExt, WorkOsError, WorkOsResult};
 /// The parameters for [`UpdateOrganization`].
 #[derive(Debug, Serialize)]
 pub struct UpdateOrganizationParams<'a> {
-    /// The ID of the organization passed in the URL.
+    /// The ID of the organization.
     #[serde(skip_serializing)]
     pub organization_id: &'a OrganizationId,
 
@@ -50,8 +50,6 @@ pub trait UpdateOrganization {
     /// # Examples
     ///
     /// ```
-    /// use std::collections::HashSet;
-    ///
     /// # use workos::WorkOsResult;
     /// # use workos::organizations::*;
     /// use workos::{ApiKey, Metadata, WorkOs};

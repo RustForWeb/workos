@@ -4,6 +4,7 @@ use crate::ApiKey;
 use crate::directory_sync::DirectorySync;
 use crate::events::Events;
 use crate::mfa::Mfa;
+use crate::organization_domains::OrganizationDomains;
 use crate::organizations::Organizations;
 use crate::portal::Portal;
 use crate::roles::Roles;
@@ -46,7 +47,7 @@ impl WorkOs {
         DirectorySync::new(self)
     }
 
-    /// Returns a [`Events`] instance.
+    /// Returns an [`Events`] instance.
     pub fn events(&self) -> Events<'_> {
         Events::new(self)
     }
@@ -56,17 +57,22 @@ impl WorkOs {
         Mfa::new(self)
     }
 
+    /// Returns an [`OrganizationDomains`] instance.
+    pub fn organization_domains(&self) -> OrganizationDomains<'_> {
+        OrganizationDomains::new(self)
+    }
+
     /// Returns an [`Organizations`] instance.
     pub fn organizations(&self) -> Organizations<'_> {
         Organizations::new(self)
     }
 
-    /// Returns an [`AdminPortal`] instance.
+    /// Returns a [`Portal`] instance.
     pub fn portal(&self) -> Portal<'_> {
         Portal::new(self)
     }
 
-    /// Returns an [`Roles`] instance.
+    /// Returns a [`Roles`] instance.
     pub fn roles(&self) -> Roles<'_> {
         Roles::new(self)
     }

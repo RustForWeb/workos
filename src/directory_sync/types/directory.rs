@@ -2,7 +2,8 @@ use derive_more::{Deref, Display, From};
 use serde::{Deserialize, Serialize};
 
 use crate::directory_sync::DirectoryType;
-use crate::organizations::{OrganizationDomainId, OrganizationId};
+use crate::organization_domains::OrganizationDomainId;
+use crate::organizations::OrganizationId;
 use crate::{KnownOrUnknown, Timestamps};
 
 /// The ID of a [`Directory`].

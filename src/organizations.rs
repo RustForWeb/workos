@@ -1,4 +1,4 @@
-//! A module for interacting with organizations within WorkOS.
+//! A module for interacting with the WorkOS Organizations API.
 
 mod operations;
 mod types;

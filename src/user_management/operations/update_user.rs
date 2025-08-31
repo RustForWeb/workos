@@ -8,7 +8,7 @@ use crate::{Metadata, ResponseExt, WorkOsError, WorkOsResult};
 /// The parameters for [`UpdateUser`].
 #[derive(Debug, Serialize)]
 pub struct UpdateUserParams<'a> {
-    /// The ID of the user passed in the URL.
+    /// The ID of the user.
     #[serde(skip_serializing)]
     pub user_id: &'a UserId,
 
