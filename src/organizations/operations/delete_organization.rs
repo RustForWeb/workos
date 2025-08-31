@@ -25,7 +25,7 @@ impl From<DeleteOrganizationError> for WorkOsError<DeleteOrganizationError> {
 /// [WorkOS Docs: Delete an Organization](https://workos.com/docs/reference/organization/delete)
 #[async_trait]
 pub trait DeleteOrganization {
-    /// Creates an [`Organization`](crate::organizations::Organization).
+    /// Permanently deletes an organization in the current environment. It cannot be undone.
     ///
     /// [WorkOS Docs: Delete an Organization](https://workos.com/docs/reference/organization/delete)
     ///
@@ -64,6 +64,7 @@ impl DeleteOrganization for Organizations<'_> {
             .workos
             .base_url()
             .join(&format!("/organizations/{id}", id = params.organization_id))?;
+
         self.workos
             .client()
             .delete(url)

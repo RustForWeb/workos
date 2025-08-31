@@ -42,7 +42,7 @@ impl From<ListOrganizationsError> for WorkOsError<ListOrganizationsError> {
 /// [WorkOS Docs: List Organizations](https://workos.com/docs/reference/organization/list)
 #[async_trait]
 pub trait ListOrganizations {
-    /// Retrieves a list of [`Organization`]s.
+    /// Get a list of all of your existing organizations matching the criteria specified.
     ///
     /// [WorkOS Docs: List Organizations](https://workos.com/docs/reference/organization/list)
     ///

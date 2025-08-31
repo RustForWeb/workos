@@ -14,12 +14,12 @@ impl From<GetOrganizationError> for WorkOsError<GetOrganizationError> {
     }
 }
 
-/// [WorkOS Docs: Get an Organization](https://workos.com/docs/reference/sso/organization/get)
+/// [WorkOS Docs: Get an Organization](https://workos.com/docs/reference/organization/get)
 #[async_trait]
 pub trait GetOrganization {
-    /// Retrieves an [`Organization`] by its ID.
+    /// Get the details of an existing organization.
     ///
-    /// [WorkOS Docs: Get an Organization](https://workos.com/docs/reference/sso/organization/get)
+    /// [WorkOS Docs: Get an Organization](https://workos.com/docs/reference/organization/get)
     ///
     /// # Examples
     ///
@@ -54,6 +54,7 @@ impl GetOrganization for Organizations<'_> {
             .workos
             .base_url()
             .join(&format!("/organizations/{id}"))?;
+
         let organization = self
             .workos
             .client()

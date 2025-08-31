@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 
+use derive_more::From;
 use serde::{Deserialize, Serialize};
 
 /// The metadata key/value paris associated with an object.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, From, PartialEq, Eq, Serialize, Deserialize)]
+#[from(forward)]
 pub struct Metadata(pub HashMap<String, String>);
 
 #[cfg(test)]

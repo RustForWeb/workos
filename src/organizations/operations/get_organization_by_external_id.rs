@@ -17,7 +17,7 @@ impl From<GetOrganizationByExternalIdError> for WorkOsError<GetOrganizationByExt
 /// [WorkOS Docs: Get an organization by External ID](https://workos.com/docs/reference/organization/get-by-external-id)
 #[async_trait]
 pub trait GetOrganizationByExternalId {
-    /// et the details of an existing organization by an external identifier.
+    /// Get the details of an existing organization by an external identifier.
     ///
     /// [WorkOS Docs: Get an organization by External ID](https://workos.com/docs/reference/organization/get-by-external-id)
     ///

@@ -1,11 +1,9 @@
-use std::collections::HashSet;
-
 use async_trait::async_trait;
 use serde::Serialize;
 use thiserror::Error;
 
-use crate::organizations::{Organization, OrganizationId, Organizations};
-use crate::{ResponseExt, WorkOsError, WorkOsResult};
+use crate::organizations::{DomainData, Organization, OrganizationId, Organizations};
+use crate::{Metadata, ResponseExt, WorkOsError, WorkOsResult};
 
 /// The parameters for [`UpdateOrganization`].
 #[derive(Debug, Serialize)]
@@ -14,21 +12,22 @@ pub struct UpdateOrganizationParams<'a> {
     #[serde(skip_serializing)]
     pub organization_id: &'a OrganizationId,
 
-    /// The name of the organization.
+    /// A descriptive name for the Organization.
+    ///
+    /// This field does not need to be unique.
     pub name: Option<&'a str>,
 
-    /// Whether the connections within this organization should allow profiles
-    /// that do not have a domain that is present in the set of the organization's
-    /// user email domains.
-    ///
-    /// See [here](https://workos.com/docs/sso/guide/frequently-asked-questions#allow-profiles-outside-organization)
-    /// for more details.
-    pub allow_profiles_outside_organization: Option<&'a bool>,
-
     /// The domains of the organization.
-    ///
-    /// At least one domain is required unless `allow_profiles_outside_organization` is `true`.
-    pub domains: Option<HashSet<&'a str>>,
+    pub domain_data: Option<Vec<DomainData<'a>>>,
+
+    /// The Stripe customer ID associated with this organization.
+    pub stripe_customer_id: Option<&'a str>,
+
+    /// The external ID of the Organization.
+    pub external_id: Option<&'a str>,
+
+    /// Object containing metadata key/value pairs associated with the Organization.
+    pub metadata: Option<Metadata>,
 }
 
 /// An error returned from [`UpdateOrganization`].
@@ -44,7 +43,7 @@ impl From<UpdateOrganizationError> for WorkOsError<UpdateOrganizationError> {
 /// [WorkOS Docs: Update an Organization](https://workos.com/docs/reference/organization/update)
 #[async_trait]
 pub trait UpdateOrganization {
-    /// Update an [`Organization`].
+    /// Updates an organization in the current environment.
     ///
     /// [WorkOS Docs: Update an Organization](https://workos.com/docs/reference/organization/update)
     ///
@@ -55,7 +54,7 @@ pub trait UpdateOrganization {
     ///
     /// # use workos::WorkOsResult;
     /// # use workos::organizations::*;
-    /// use workos::{ApiKey, WorkOs};
+    /// use workos::{ApiKey, Metadata, WorkOs};
     ///
     /// # async fn run() -> WorkOsResult<(), UpdateOrganizationError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));
@@ -65,8 +64,16 @@ pub trait UpdateOrganization {
     ///     .update_organization(&UpdateOrganizationParams {
     ///         organization_id: &OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"),
     ///         name: Some("Foo Corp"),
-    ///         allow_profiles_outside_organization: None,
-    ///         domains: Some(HashSet::from(["foo-corp.com"])),
+    ///         domain_data: Some(vec![DomainData {
+    ///             domain: "foo-corp.com",
+    ///             state: DomainDataState::Verified,
+    ///         }]),
+    ///         stripe_customer_id: Some("cus_R9qWAGMQ6nGE7V"),
+    ///         external_id: Some("2fe01467-f7ea-4dd2-8b79-c2b4f56d0191"),
+    ///         metadata: Some(Metadata::from([(
+    ///             "tier".to_string(),
+    ///             "diamond".to_string(),
+    ///         )])),
     ///     })
     ///     .await?;
     /// # Ok(())
@@ -88,6 +95,7 @@ impl UpdateOrganization for Organizations<'_> {
             .workos
             .base_url()
             .join(&format!("/organizations/{id}", id = params.organization_id))?;
+
         let organization = self
             .workos
             .client()
@@ -110,8 +118,8 @@ mod test {
     use serde_json::json;
     use tokio;
 
-    use crate::organizations::OrganizationId;
-    use crate::{ApiKey, WorkOs};
+    use crate::organizations::{DomainDataState, OrganizationId};
+    use crate::{ApiKey, Metadata, WorkOs};
 
     use super::*;
 
@@ -134,10 +142,15 @@ mod test {
                     "object": "organization",
                     "name": "Foo Corp",
                     "allow_profiles_outside_organization": false,
+                    "stripe_customer_id": "cus_R9qWAGMQ6nGE7V",
+                    "external_id": "2fe01467-f7ea-4dd2-8b79-c2b4f56d0191",
+                    "metadata": {
+                        "tier": "diamond"
+                    },
                     "created_at": "2021-06-25T19:07:33.155Z",
                     "updated_at": "2021-06-25T19:07:33.155Z",
                     "domains": [
-                        {
+                         {
                             "object": "organization_domain",
                             "id": "org_domain_01EHZNVPK2QXHMVWCEDQEKY69A",
                             "domain": "foo-corp.com",
@@ -160,8 +173,16 @@ mod test {
             .update_organization(&UpdateOrganizationParams {
                 organization_id: &OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"),
                 name: Some("Foo Corp"),
-                allow_profiles_outside_organization: Some(&false),
-                domains: Some(HashSet::from(["foo-corp.com"])),
+                domain_data: Some(vec![DomainData {
+                    domain: "foo-corp.com",
+                    state: DomainDataState::Verified,
+                }]),
+                stripe_customer_id: Some("cus_R9qWAGMQ6nGE7V"),
+                external_id: Some("2fe01467-f7ea-4dd2-8b79-c2b4f56d0191"),
+                metadata: Some(Metadata::from([(
+                    "tier".to_string(),
+                    "diamond".to_string(),
+                )])),
             })
             .await
             .unwrap();
