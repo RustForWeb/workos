@@ -1,16 +1,8 @@
 use async_trait::async_trait;
-use serde::Serialize;
 use thiserror::Error;
 
 use crate::sso::{ConnectionId, Sso};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
-
-/// The parameters for [`DeleteConnection`].
-#[derive(Debug, Serialize)]
-pub struct DeleteConnectionParams<'a> {
-    /// The ID of the connection to delete.
-    pub connection_id: &'a ConnectionId,
-}
 
 /// An error returned from [`DeleteConnection`].
 #[derive(Debug, Error)]
@@ -41,16 +33,14 @@ pub trait DeleteConnection {
     ///
     /// workos
     ///     .sso()
-    ///     .delete_connection(&DeleteConnectionParams {
-    ///         connection_id: &ConnectionId::from("conn_01E2NPPCT7XQ2MVVYDHWGK1WN4"),
-    ///     })
+    ///     .delete_connection(&ConnectionId::from("conn_01E2NPPCT7XQ2MVVYDHWGK1WN4"))
     ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
     async fn delete_connection(
         &self,
-        params: &DeleteConnectionParams<'_>,
+        connection_id: &ConnectionId,
     ) -> WorkOsResult<(), DeleteConnectionError>;
 }
 
@@ -58,12 +48,13 @@ pub trait DeleteConnection {
 impl DeleteConnection for Sso<'_> {
     async fn delete_connection(
         &self,
-        params: &DeleteConnectionParams<'_>,
+        connection_id: &ConnectionId,
     ) -> WorkOsResult<(), DeleteConnectionError> {
         let url = self
             .workos
             .base_url()
-            .join(&format!("/connections/{id}", id = params.connection_id))?;
+            .join(&format!("/connections/{connection_id}"))?;
+
         self.workos
             .client()
             .delete(url)
@@ -105,9 +96,7 @@ mod test {
 
         let result = workos
             .sso()
-            .delete_connection(&DeleteConnectionParams {
-                connection_id: &ConnectionId::from("conn_01E2NPPCT7XQ2MVVYDHWGK1WN4"),
-            })
+            .delete_connection(&ConnectionId::from("conn_01E2NPPCT7XQ2MVVYDHWGK1WN4"))
             .await;
 
         assert_matches!(result, Ok(()));

@@ -1,16 +1,8 @@
 use async_trait::async_trait;
-use serde::Serialize;
 use thiserror::Error;
 
 use crate::user_management::{UserId, UserManagement};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
-
-/// The parameters for [`DeleteUser`].
-#[derive(Debug, Serialize)]
-pub struct DeleteUserParams<'a> {
-    /// The unique ID of the user.
-    pub user_id: &'a UserId,
-}
 
 /// An error returned from [`DeleteUser`].
 #[derive(Debug, Error)]
@@ -41,27 +33,22 @@ pub trait DeleteUser {
     ///
     /// workos
     ///     .user_management()
-    ///     .delete_user(&DeleteUserParams {
-    ///         user_id: &UserId::from("user_01F3GZ5ZGZBZVQGZVHJFVXZJGZ"),
-    ///     })
+    ///     .delete_user(&UserId::from("user_01F3GZ5ZGZBZVQGZVHJFVXZJGZ"))
     ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
-    async fn delete_user(&self, params: &DeleteUserParams<'_>)
-    -> WorkOsResult<(), DeleteUserError>;
+    async fn delete_user(&self, user_id: &UserId) -> WorkOsResult<(), DeleteUserError>;
 }
 
 #[async_trait]
 impl DeleteUser for UserManagement<'_> {
-    async fn delete_user(
-        &self,
-        params: &DeleteUserParams<'_>,
-    ) -> WorkOsResult<(), DeleteUserError> {
+    async fn delete_user(&self, user_id: &UserId) -> WorkOsResult<(), DeleteUserError> {
         let url = self
             .workos
             .base_url()
-            .join(&format!("/user_management/users/{id}", id = params.user_id))?;
+            .join(&format!("/user_management/users/{user_id}"))?;
+
         self.workos
             .client()
             .delete(url)
@@ -104,9 +91,7 @@ mod test {
 
         let result = workos
             .user_management()
-            .delete_user(&DeleteUserParams {
-                user_id: &UserId::from("user_01F3GZ5ZGZBZVQGZVHJFVXZJGZ"),
-            })
+            .delete_user(&UserId::from("user_01F3GZ5ZGZBZVQGZVHJFVXZJGZ"))
             .await;
 
         assert_matches!(result, Ok(()));

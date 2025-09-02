@@ -1,16 +1,8 @@
 use async_trait::async_trait;
-use serde::Serialize;
 use thiserror::Error;
 
 use crate::user_management::{OrganizationMembershipId, UserManagement};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
-
-/// The parameters for [`DeleteOrganizationMembership`].
-#[derive(Debug, Serialize)]
-pub struct DeleteOrganizationMembershipParams<'a> {
-    /// The unique ID of the organization membership.
-    pub organization_membership_id: &'a OrganizationMembershipId,
-}
 
 /// An error returned from [`DeleteOrganizationMembership`].
 #[derive(Debug, Error)]
@@ -41,16 +33,16 @@ pub trait DeleteOrganizationMembership {
     ///
     /// workos
     ///     .user_management()
-    ///     .delete_organization_membership(&DeleteOrganizationMembershipParams {
-    ///         organization_membership_id: &OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5"),
-    ///     })
+    ///     .delete_organization_membership(&OrganizationMembershipId::from(
+    ///         "om_01E4ZCR3C56J083X43JQXF3JK5"
+    ///     ))
     ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
     async fn delete_organization_membership(
         &self,
-        params: &DeleteOrganizationMembershipParams<'_>,
+        organization_membership_id: &OrganizationMembershipId,
     ) -> WorkOsResult<(), DeleteOrganizationMembershipError>;
 }
 
@@ -58,12 +50,12 @@ pub trait DeleteOrganizationMembership {
 impl DeleteOrganizationMembership for UserManagement<'_> {
     async fn delete_organization_membership(
         &self,
-        params: &DeleteOrganizationMembershipParams<'_>,
+        organization_membership_id: &OrganizationMembershipId,
     ) -> WorkOsResult<(), DeleteOrganizationMembershipError> {
         let url = self.workos.base_url().join(&format!(
-            "/user_management/users/{id}",
-            id = params.organization_membership_id
+            "/user_management/users/{organization_membership_id}"
         ))?;
+
         self.workos
             .client()
             .delete(url)
@@ -106,11 +98,9 @@ mod test {
 
         let result = workos
             .user_management()
-            .delete_organization_membership(&DeleteOrganizationMembershipParams {
-                organization_membership_id: &OrganizationMembershipId::from(
-                    "om_01E4ZCR3C56J083X43JQXF3JK5",
-                ),
-            })
+            .delete_organization_membership(&OrganizationMembershipId::from(
+                "om_01E4ZCR3C56J083X43JQXF3JK5",
+            ))
             .await;
 
         assert_matches!(result, Ok(()));

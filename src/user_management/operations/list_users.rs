@@ -33,7 +33,7 @@ impl From<ListUsersError> for WorkOsError<ListUsersError> {
 /// [WorkOS Docs: List Users](https://workos.com/docs/reference/user-management/user/list)
 #[async_trait]
 pub trait ListUsers {
-    /// Retrieves a list of [`User`]s.
+    /// Get a list of all of your existing users matching the criteria specified.
     ///
     /// [WorkOS Docs: List Users](https://workos.com/docs/reference/user-management/user/list)
     ///

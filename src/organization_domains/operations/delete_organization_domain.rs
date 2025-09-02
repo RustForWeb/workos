@@ -1,16 +1,8 @@
 use async_trait::async_trait;
-use serde::Serialize;
 use thiserror::Error;
 
 use crate::organization_domains::{OrganizationDomainId, OrganizationDomains};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
-
-/// The parameters for [`DeleteOrganizationDomain`].
-#[derive(Debug, Serialize)]
-pub struct DeleteOrganizationDomainParams<'a> {
-    /// The ID of the organization_domain.
-    pub organization_domain_id: &'a OrganizationDomainId,
-}
 
 /// An error returned from [`DeleteOrganizationDomain`].
 #[derive(Debug, Error)]
@@ -41,16 +33,16 @@ pub trait DeleteOrganizationDomain {
     ///
     /// workos
     ///     .organization_domains()
-    ///     .delete_organization_domain(&DeleteOrganizationDomainParams {
-    ///         organization_domain_id: &OrganizationDomainId::from("org_domain_01HEJXJSTVEDT7T58BM70FMFET"),
-    ///     })
+    ///     .delete_organization_domain(&OrganizationDomainId::from(
+    ///         "org_domain_01HEJXJSTVEDT7T58BM70FMFET"
+    ///     ))
     ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
     async fn delete_organization_domain(
         &self,
-        params: &DeleteOrganizationDomainParams<'_>,
+        organization_domain_id: &OrganizationDomainId,
     ) -> WorkOsResult<(), DeleteOrganizationDomainError>;
 }
 
@@ -58,12 +50,12 @@ pub trait DeleteOrganizationDomain {
 impl DeleteOrganizationDomain for OrganizationDomains<'_> {
     async fn delete_organization_domain(
         &self,
-        params: &DeleteOrganizationDomainParams<'_>,
+        organization_domain_id: &OrganizationDomainId,
     ) -> WorkOsResult<(), DeleteOrganizationDomainError> {
-        let url = self.workos.base_url().join(&format!(
-            "/organization_domains/{id}",
-            id = params.organization_domain_id
-        ))?;
+        let url = self
+            .workos
+            .base_url()
+            .join(&format!("/organization_domains/{organization_domain_id}"))?;
 
         self.workos
             .client()
@@ -107,11 +99,9 @@ mod test {
 
         let result = workos
             .organization_domains()
-            .delete_organization_domain(&DeleteOrganizationDomainParams {
-                organization_domain_id: &OrganizationDomainId::from(
-                    "org_domain_01HEJXJSTVEDT7T58BM70FMFET",
-                ),
-            })
+            .delete_organization_domain(&OrganizationDomainId::from(
+                "org_domain_01HEJXJSTVEDT7T58BM70FMFET",
+            ))
             .await;
 
         assert_matches!(result, Ok(()));

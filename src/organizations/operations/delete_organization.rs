@@ -1,16 +1,8 @@
 use async_trait::async_trait;
-use serde::Serialize;
 use thiserror::Error;
 
 use crate::organizations::{OrganizationId, Organizations};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
-
-/// The parameters for [`DeleteOrganization`].
-#[derive(Debug, Serialize)]
-pub struct DeleteOrganizationParams<'a> {
-    /// The ID of the organization.
-    pub organization_id: &'a OrganizationId,
-}
 
 /// An error returned from [`DeleteOrganization`].
 #[derive(Debug, Error)]
@@ -41,16 +33,14 @@ pub trait DeleteOrganization {
     ///
     /// workos
     ///     .organizations()
-    ///     .delete_organization(&DeleteOrganizationParams {
-    ///         organization_id: &OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"),
-    ///     })
+    ///     .delete_organization(&OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"))
     ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
     async fn delete_organization(
         &self,
-        params: &DeleteOrganizationParams<'_>,
+        organization_id: &OrganizationId,
     ) -> WorkOsResult<(), DeleteOrganizationError>;
 }
 
@@ -58,12 +48,12 @@ pub trait DeleteOrganization {
 impl DeleteOrganization for Organizations<'_> {
     async fn delete_organization(
         &self,
-        params: &DeleteOrganizationParams<'_>,
+        organization_id: &OrganizationId,
     ) -> WorkOsResult<(), DeleteOrganizationError> {
         let url = self
             .workos
             .base_url()
-            .join(&format!("/organizations/{id}", id = params.organization_id))?;
+            .join(&format!("/organizations/{organization_id}"))?;
 
         self.workos
             .client()
@@ -104,9 +94,7 @@ mod test {
 
         let result = workos
             .organizations()
-            .delete_organization(&DeleteOrganizationParams {
-                organization_id: &OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"),
-            })
+            .delete_organization(&OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT"))
             .await;
 
         assert_matches!(result, Ok(()));

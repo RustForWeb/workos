@@ -1,16 +1,8 @@
 use async_trait::async_trait;
-use serde::Serialize;
 use thiserror::Error;
 
 use crate::directory_sync::{DirectoryId, DirectorySync};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
-
-/// The parameters for [`DeleteDirectory`].
-#[derive(Debug, Serialize)]
-pub struct DeleteDirectoryParams<'a> {
-    /// Unique identifier for the Directory.
-    pub directory_id: &'a DirectoryId,
-}
 
 /// An error returned from [`DeleteDirectory`].
 #[derive(Debug, Error)]
@@ -41,16 +33,14 @@ pub trait DeleteDirectory {
     ///
     /// workos
     ///     .directory_sync()
-    ///     .delete_directory(&DeleteDirectoryParams {
-    ///         directory_id: &DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74"),
-    ///     })
+    ///     .delete_directory(&DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74"))
     ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
     async fn delete_directory(
         &self,
-        params: &DeleteDirectoryParams<'_>,
+        directory_id: &DirectoryId,
     ) -> WorkOsResult<(), DeleteDirectoryError>;
 }
 
@@ -58,12 +48,13 @@ pub trait DeleteDirectory {
 impl DeleteDirectory for DirectorySync<'_> {
     async fn delete_directory(
         &self,
-        params: &DeleteDirectoryParams<'_>,
+        directory_id: &DirectoryId,
     ) -> WorkOsResult<(), DeleteDirectoryError> {
         let url = self
             .workos
             .base_url()
-            .join(&format!("/directories/{id}", id = params.directory_id))?;
+            .join(&format!("/directories/{directory_id}"))?;
+
         self.workos
             .client()
             .delete(url)
@@ -108,9 +99,7 @@ mod test {
 
         let result = workos
             .directory_sync()
-            .delete_directory(&DeleteDirectoryParams {
-                directory_id: &DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74"),
-            })
+            .delete_directory(&DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74"))
             .await;
 
         assert_matches!(result, Ok(()));

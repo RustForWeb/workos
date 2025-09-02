@@ -1,16 +1,8 @@
 use async_trait::async_trait;
-use serde::Serialize;
 use thiserror::Error;
 
 use crate::user_management::{OrganizationMembership, OrganizationMembershipId, UserManagement};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
-
-/// The parameters for [`DeactivateOrganizationMembership`].
-#[derive(Debug, Serialize)]
-pub struct DeactivateOrganizationMembershipParams<'a> {
-    /// The unique ID of the organization membership.
-    pub organization_membership_id: &'a OrganizationMembershipId,
-}
 
 /// An error returned from [`DeactivateOrganizationMembership`].
 #[derive(Debug, Error)]
@@ -43,16 +35,16 @@ pub trait DeactivateOrganizationMembership {
     ///
     /// let organization_membership = workos
     ///     .user_management()
-    ///     .deactivate_organization_membership(&DeactivateOrganizationMembershipParams {
-    ///         organization_membership_id: &OrganizationMembershipId::from("om_01E4ZCR3C56J083X43JQXF3JK5"),
-    ///     })
+    ///     .deactivate_organization_membership(&OrganizationMembershipId::from(
+    ///         "om_01E4ZCR3C56J083X43JQXF3JK5"
+    ///     ))
     ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
     async fn deactivate_organization_membership(
         &self,
-        params: &DeactivateOrganizationMembershipParams<'_>,
+        organization_membership_id: &OrganizationMembershipId,
     ) -> WorkOsResult<OrganizationMembership, DeactivateOrganizationMembershipError>;
 }
 
@@ -60,18 +52,17 @@ pub trait DeactivateOrganizationMembership {
 impl DeactivateOrganizationMembership for UserManagement<'_> {
     async fn deactivate_organization_membership(
         &self,
-        params: &DeactivateOrganizationMembershipParams<'_>,
+        organization_membership_id: &OrganizationMembershipId,
     ) -> WorkOsResult<OrganizationMembership, DeactivateOrganizationMembershipError> {
         let url = self.workos.base_url().join(&format!(
-            "/user_management/organization_memberships/{id}/deactivate",
-            id = params.organization_membership_id
+            "/user_management/organization_memberships/{organization_membership_id}/deactivate",
         ))?;
+
         let organization_membership = self
             .workos
             .client()
             .post(url)
             .bearer_auth(self.workos.key())
-            .json(&params)
             .send()
             .await?
             .handle_unauthorized_or_generic_error()
@@ -129,11 +120,9 @@ mod test {
 
         let organization_membership = workos
             .user_management()
-            .deactivate_organization_membership(&DeactivateOrganizationMembershipParams {
-                organization_membership_id: &OrganizationMembershipId::from(
-                    "om_01E4ZCR3C56J083X43JQXF3JK5",
-                ),
-            })
+            .deactivate_organization_membership(&OrganizationMembershipId::from(
+                "om_01E4ZCR3C56J083X43JQXF3JK5",
+            ))
             .await
             .unwrap();
 
