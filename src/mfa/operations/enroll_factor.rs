@@ -91,7 +91,7 @@ impl HandleEnrollFactorError for Response {
 /// [WorkOS Docs: Enroll Factor](https://workos.com/docs/reference/mfa/enroll-factor)
 #[async_trait]
 pub trait EnrollFactor {
-    /// Enrolls an [`AuthenticationFactor`] to be used as an additional factor of authentication.
+    /// Enrolls an Authentication Factor to be used as an additional factor of authentication.
     ///
     /// [WorkOS Docs: Enroll Factor](https://workos.com/docs/reference/mfa/enroll-factor)
     ///

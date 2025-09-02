@@ -34,7 +34,7 @@ pub struct AuthenticationFactorIdAndType {
 /// [WorkOS Docs: Authentication Factor](https://workos.com/docs/reference/mfa/authentication-factor)
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AuthenticationFactor {
-    /// The ID of the authentication factor.
+    /// The unique ID of the authentication factor.
     pub id: AuthenticationFactorId,
 
     /// The type of the authentication factor.

@@ -14,7 +14,7 @@ pub enum ChallengeAuthenticationFactorType<'a> {
 
     /// Challenge an SMS authentication factor.
     Sms {
-        /// The template for the sent SMS message.
+        /// Optional template for SMS messages.
         ///
         /// Use the `{{code}}` token to inject the one-time code into the message, e.g.,
         /// `"Your Foo Corp one-time code is {{code}}."`.
@@ -26,7 +26,7 @@ pub enum ChallengeAuthenticationFactorType<'a> {
 /// The parameters for [`ChallengeFactor`].
 #[derive(Debug, Serialize)]
 pub struct ChallengeFactorParams<'a> {
-    /// The ID of the authentication factor to challenge.
+    /// The unique ID of the Authentication Factor to be challenged.
     #[serde(skip)]
     pub authentication_factor_id: &'a AuthenticationFactorId,
 
@@ -42,7 +42,7 @@ pub enum ChallengeFactorError {}
 /// [WorkOS Docs: Challenge Factor](https://workos.com/docs/reference/mfa/challenge-factor)
 #[async_trait]
 pub trait ChallengeFactor {
-    /// Creates a challenge for an authentication factor.
+    /// Creates a Challenge for an Authentication Factor.
     ///
     /// [WorkOS Docs: Challenge Factor](https://workos.com/docs/reference/mfa/challenge-factor)
     ///

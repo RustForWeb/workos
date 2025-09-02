@@ -8,10 +8,10 @@ use crate::{ResponseExt, WorkOsResult};
 /// The response for [`VerifyChallenge`].
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VerifyChallengeResponse {
-    /// The challenge that was verified.
+    /// The relevant Authentication Challenge.
     pub challenge: AuthenticationChallenge,
 
-    /// Whether the challenge was verified successfully.
+    /// Indicates whether the code was correct.
     #[serde(rename = "valid")]
     pub is_valid: bool,
 }
@@ -19,11 +19,11 @@ pub struct VerifyChallengeResponse {
 /// The parameters for [`VerifyChallenge`].
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct VerifyChallengeParams<'a> {
-    /// The ID of the authentication challenge to verify.
+    /// The unique ID of the authentication Challenge.
     #[serde(skip)]
     pub authentication_challenge_id: &'a AuthenticationChallengeId,
 
-    /// The MFA code to verify.
+    /// The 6 digit code to be verified.
     pub code: &'a MfaCode,
 }
 
@@ -34,7 +34,7 @@ pub enum VerifyChallengeError {}
 /// [WorkOS Docs: Verify Challenge](https://workos.com/docs/reference/mfa/verify-challenge)
 #[async_trait]
 pub trait VerifyChallenge {
-    /// Attempts a verification for an authentication challenge.
+    /// Verify Authentication Challenge.
     ///
     /// [WorkOS Docs: Verify Challenge](https://workos.com/docs/reference/mfa/verify-challenge)
     ///

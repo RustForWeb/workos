@@ -14,10 +14,10 @@ pub struct AuthenticationChallengeId(String);
 /// [WorkOS Docs: Authentication Challenge](https://workos.com/docs/reference/mfa/authentication-challenge)
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AuthenticationChallenge {
-    /// The ID of the authentication challenge.
+    /// The unique ID of the authentication challenge.
     pub id: AuthenticationChallengeId,
 
-    /// The ID of the authentication factor for which the challenge was issued.
+    /// The unique ID of the authentication factor the challenge belongs to.
     pub authentication_factor_id: AuthenticationFactorId,
 
     /// The timestamp when the authentication challenge will expire.
