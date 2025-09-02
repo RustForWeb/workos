@@ -17,7 +17,7 @@ impl From<GetDirectoryError> for WorkOsError<GetDirectoryError> {
 /// [WorkOS Docs: Get a Directory](https://workos.com/docs/reference/directory-sync/directory/get)
 #[async_trait]
 pub trait GetDirectory {
-    /// Retrieves a [`Directory`] by its ID.
+    /// Get the details of an existing directory.
     ///
     /// [WorkOS Docs: Get a Directory](https://workos.com/docs/reference/directory-sync/directory/get)
     ///
@@ -86,14 +86,14 @@ mod test {
             .with_status(200)
             .with_body(
                 json!({
-                  "id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-                  "domain": "foo-corp.com",
-                  "name": "Foo Corp",
-                  "organization_id": "org_01EHZNVPK3SFK441A1RGBFSHRT",
-                  "state": "unlinked",
-                  "type": "gsuite directory",
-                  "created_at": "2021-06-25T19:07:33.155Z",
-                  "updated_at": "2021-06-25T19:07:33.155Z"
+                    "id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                    "domain": "foo-corp.com",
+                    "name": "Foo Corp",
+                    "organization_id": "org_01EHZNVPK3SFK441A1RGBFSHRT",
+                    "state": "unlinked",
+                    "type": "gsuite directory",
+                    "created_at": "2021-06-25T19:07:33.155Z",
+                    "updated_at": "2021-06-25T19:07:33.155Z"
                 })
                 .to_string(),
             )

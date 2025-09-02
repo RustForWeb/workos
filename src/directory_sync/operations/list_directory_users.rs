@@ -4,23 +4,6 @@ use serde::Serialize;
 use crate::directory_sync::{DirectoryGroupId, DirectoryId, DirectorySync, DirectoryUser};
 use crate::{PaginatedList, PaginationParams, ResponseExt, WorkOsResult};
 
-/// A filter for [`ListDirectoryUsers`].
-#[derive(Debug, Serialize)]
-#[serde(untagged)]
-pub enum DirectoryUsersFilter<'a> {
-    /// Retrieve directory users within the specified directory.
-    Directory {
-        /// The ID of the directory to retrieve directory users in.
-        directory: &'a DirectoryId,
-    },
-
-    /// Retrieve directory users within the specified directory group.
-    Group {
-        /// The ID of the directory group to retrieve directory users in.
-        group: &'a DirectoryGroupId,
-    },
-}
-
 /// The parameters for [`ListDirectoryUsers`].
 #[derive(Debug, Serialize)]
 pub struct ListDirectoryUsersParams<'a> {
@@ -28,15 +11,17 @@ pub struct ListDirectoryUsersParams<'a> {
     #[serde(flatten)]
     pub pagination: PaginationParams<'a>,
 
-    /// The filter to use when listing directory users.
-    #[serde(flatten)]
-    pub filter: DirectoryUsersFilter<'a>,
+    /// Unique identifier of the WorkOS Directory.
+    pub directory: Option<&'a DirectoryId>,
+
+    /// Unique identifier of the WorkOS Directory Group.
+    pub group: Option<&'a DirectoryGroupId>,
 }
 
 /// [WorkOS Docs: List Directory Users](https://workos.com/docs/reference/directory-sync/user/list)
 #[async_trait]
 pub trait ListDirectoryUsers {
-    /// Retrieves a list of [`DirectoryUser`]s.
+    /// Get a list of all of existing Directory Users matching the criteria specified.
     ///
     /// [WorkOS Docs: List Directory Users](https://workos.com/docs/reference/directory-sync/user/list)
     ///
@@ -51,9 +36,8 @@ pub trait ListDirectoryUsers {
     /// let paginated_users = workos
     ///     .directory_sync()
     ///     .list_directory_users(&ListDirectoryUsersParams {
-    ///         filter: DirectoryUsersFilter::Directory {
-    ///             directory: &DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74"),
-    ///         },
+    ///         directory: Some(&DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74")),
+    ///         group: None,
     ///         pagination: Default::default(),
     ///     })
     ///     .await?;
@@ -123,77 +107,83 @@ mod test {
             .with_status(200)
             .with_body(
                 json!({
-                  "data": [
-                    {
-                      "id": "directory_user_01E1JJHG3BFJ3FNRRHSFWEBNCS",
-                      "idp_id": "1902",
-                      "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-                      "emails": [
+                    "data": [
                         {
-                          "primary": true,
-                          "type": "work",
-                          "value": "jan@foo-corp.com"
-                        }
-                      ],
-                      "first_name": "Jan",
-                      "last_name": "Brown",
-                      "username": "jan@foo-corp.com",
-                      "groups": [
+                            "id": "directory_user_01E1JJHG3BFJ3FNRRHSFWEBNCS",
+                            "idp_id": "1902",
+                            "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                            "emails": [
+                                {
+                                    "primary": true,
+                                    "type": "work",
+                                    "value": "jan@foo-corp.com"
+                                }
+                            ],
+                            "first_name": "Jan",
+                            "last_name": "Brown",
+                            "username": "jan@foo-corp.com",
+                            "groups": [
+                                {
+                                    "id": "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
+                                    "idp_id": "",
+                                    "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                                    "name": "Engineering",
+                                    "created_at": "2021-06-25T19:07:33.155Z",
+                                    "updated_at": "2021-06-25T19:07:33.155Z"
+                                }
+                            ],
+                            "state": "active",
+                            "created_at": "2021-06-25T19:07:33.155Z",
+                            "updated_at": "2021-06-25T19:07:33.155Z",
+                            "custom_attributes": {
+                                "department": "Engineering",
+                                "job_title": "Software Engineer"
+                            },
+                            "role": {
+                                "slug": "member"
+                            }
+                        },
                         {
-                          "id": "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
-                          "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-                          "name": "Engineering",
-                          "created_at": "2021-06-25T19:07:33.155Z",
-                          "updated_at": "2021-06-25T19:07:33.155Z",
-                          "raw_attributes": {}
+                            "id": "directory_user_01E1JJHG10ANRA2V6PAX3GD7TE",
+                            "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                            "idp_id": "8953",
+                            "emails": [
+                                {
+                                    "primary": true,
+                                    "type": "work",
+                                    "value": "rosalinda@foo-corp.com"
+                                }
+                            ],
+                            "first_name": "Rosalinda",
+                            "last_name": "Swift",
+                            "username": "rosalinda@foo-corp.com",
+                            "groups": [
+                                {
+                                    "id": "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
+                                    "idp_id": "",
+                                    "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                                    "name": "Engineering",
+                                    "created_at": "2021-06-25T19:07:33.155Z",
+                                    "updated_at": "2021-06-25T19:07:33.155Z"
+                                }
+                            ],
+                            "state": "active",
+                            "created_at": "2021-06-25T19:07:33.155Z",
+                            "updated_at": "2021-06-25T19:07:33.155Z",
+                            "custom_attributes": {
+                                "department": "Engineering",
+                                "job_title": "Software Engineer"
+                            },
+                            "role": {
+                                "slug": "member"
+                            }
                         }
-                      ],
-                      "state": "active",
-                      "created_at": "2021-06-25T19:07:33.155Z",
-                      "updated_at": "2021-06-25T19:07:33.155Z",
-                      "custom_attributes": {
-                        "department": "Engineering"
-                      },
-                      "raw_attributes": {}
-                    },
-                    {
-                      "id": "directory_user_01E1JJHG10ANRA2V6PAX3GD7TE",
-                      "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-                      "idp_id": "8953",
-                      "emails": [
-                        {
-                          "primary": true,
-                          "type": "work",
-                          "value": "rosalinda@foo-corp.com"
-                        }
-                      ],
-                      "first_name": "Rosalinda",
-                      "last_name": "Swift",
-                      "username": "rosalinda@foo-corp.com",
-                      "groups": [
-                        {
-                          "id": "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
-                          "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-                          "name": "Engineering",
-                          "created_at": "2021-06-25T19:07:33.155Z",
-                          "updated_at": "2021-06-25T19:07:33.155Z",
-                          "raw_attributes": {}
-                        }
-                      ],
-                      "state": "active",
-                      "created_at": "2021-06-25T19:07:33.155Z",
-                      "updated_at": "2021-06-25T19:07:33.155Z",
-                      "custom_attributes": {
-                        "department": "Engineering"
-                      },
-                      "raw_attributes": {}
+                    ],
+                    "object": "list",
+                    "list_metadata": {
+                        "after": "directory_user_01E4RH82CC8QAP8JTRCTNDSS4C",
+                        "before": "directory_user_01E4RH828021B9ZZB8KH8E2Z1W"
                     }
-                  ],
-                  "object": "list",
-                  "list_metadata": {
-                    "after": "directory_user_01E4RH82CC8QAP8JTRCTNDSS4C",
-                    "before": "directory_user_01E4RH828021B9ZZB8KH8E2Z1W"
-                  }
                 })
                 .to_string(),
             )
@@ -204,9 +194,8 @@ mod test {
             .directory_sync()
             .list_directory_users(&ListDirectoryUsersParams {
                 pagination: Default::default(),
-                filter: DirectoryUsersFilter::Directory {
-                    directory: &DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74"),
-                },
+                directory: Some(&DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74")),
+                group: None,
             })
             .await
             .unwrap();
@@ -245,77 +234,83 @@ mod test {
             .with_status(200)
             .with_body(
                 json!({
-                  "data": [
-                    {
-                      "id": "directory_user_01E1JJHG3BFJ3FNRRHSFWEBNCS",
-                      "idp_id": "1902",
-                      "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-                      "emails": [
+                    "data": [
                         {
-                          "primary": true,
-                          "type": "work",
-                          "value": "jan@foo-corp.com"
-                        }
-                      ],
-                      "first_name": "Jan",
-                      "last_name": "Brown",
-                      "username": "jan@foo-corp.com",
-                      "groups": [
+                            "id": "directory_user_01E1JJHG3BFJ3FNRRHSFWEBNCS",
+                            "idp_id": "1902",
+                            "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                            "emails": [
+                                {
+                                    "primary": true,
+                                    "type": "work",
+                                    "value": "jan@foo-corp.com"
+                                }
+                            ],
+                            "first_name": "Jan",
+                            "last_name": "Brown",
+                            "username": "jan@foo-corp.com",
+                            "groups": [
+                                {
+                                    "id": "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
+                                    "idp_id": "",
+                                    "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                                    "name": "Engineering",
+                                    "created_at": "2021-06-25T19:07:33.155Z",
+                                    "updated_at": "2021-06-25T19:07:33.155Z"
+                                }
+                            ],
+                            "state": "active",
+                            "created_at": "2021-06-25T19:07:33.155Z",
+                            "updated_at": "2021-06-25T19:07:33.155Z",
+                            "custom_attributes": {
+                                "department": "Engineering",
+                                "job_title": "Software Engineer"
+                            },
+                            "role": {
+                                "slug": "member"
+                            }
+                        },
                         {
-                          "id": "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
-                          "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-                          "name": "Engineering",
-                          "created_at": "2021-06-25T19:07:33.155Z",
-                          "updated_at": "2021-06-25T19:07:33.155Z",
-                          "raw_attributes": {}
+                            "id": "directory_user_01E1JJHG10ANRA2V6PAX3GD7TE",
+                            "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                            "idp_id": "8953",
+                            "emails": [
+                                {
+                                    "primary": true,
+                                    "type": "work",
+                                    "value": "rosalinda@foo-corp.com"
+                                }
+                            ],
+                            "first_name": "Rosalinda",
+                            "last_name": "Swift",
+                            "username": "rosalinda@foo-corp.com",
+                            "groups": [
+                                {
+                                    "id": "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
+                                    "idp_id": "",
+                                    "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                                    "name": "Engineering",
+                                    "created_at": "2021-06-25T19:07:33.155Z",
+                                    "updated_at": "2021-06-25T19:07:33.155Z"
+                                }
+                            ],
+                            "state": "active",
+                            "created_at": "2021-06-25T19:07:33.155Z",
+                            "updated_at": "2021-06-25T19:07:33.155Z",
+                            "custom_attributes": {
+                                "department": "Engineering",
+                                "job_title": "Software Engineer"
+                            },
+                            "role": {
+                                "slug": "member"
+                            }
                         }
-                      ],
-                      "state": "active",
-                      "created_at": "2021-06-25T19:07:33.155Z",
-                      "updated_at": "2021-06-25T19:07:33.155Z",
-                      "custom_attributes": {
-                        "department": "Engineering"
-                      },
-                      "raw_attributes": {}
-                    },
-                    {
-                      "id": "directory_user_01E1JJHG10ANRA2V6PAX3GD7TE",
-                      "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-                      "idp_id": "8953",
-                      "emails": [
-                        {
-                          "primary": true,
-                          "type": "work",
-                          "value": "rosalinda@foo-corp.com"
-                        }
-                      ],
-                      "first_name": "Rosalinda",
-                      "last_name": "Swift",
-                      "username": "rosalinda@foo-corp.com",
-                      "groups": [
-                        {
-                          "id": "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
-                          "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-                          "name": "Engineering",
-                          "created_at": "2021-06-25T19:07:33.155Z",
-                          "updated_at": "2021-06-25T19:07:33.155Z",
-                          "raw_attributes": {}
-                        }
-                      ],
-                      "state": "active",
-                      "created_at": "2021-06-25T19:07:33.155Z",
-                      "updated_at": "2021-06-25T19:07:33.155Z",
-                      "custom_attributes": {
-                        "department": "Engineering"
-                      },
-                      "raw_attributes": {}
+                    ],
+                    "object": "list",
+                    "list_metadata": {
+                        "after": "directory_user_01E4RH82CC8QAP8JTRCTNDSS4C",
+                        "before": "directory_user_01E4RH828021B9ZZB8KH8E2Z1W"
                     }
-                  ],
-                  "object": "list",
-                  "list_metadata": {
-                    "after": "directory_user_01E4RH82CC8QAP8JTRCTNDSS4C",
-                    "before": "directory_user_01E4RH828021B9ZZB8KH8E2Z1W"
-                  }
                 })
                 .to_string(),
             )
@@ -326,9 +321,10 @@ mod test {
             .directory_sync()
             .list_directory_users(&ListDirectoryUsersParams {
                 pagination: Default::default(),
-                filter: DirectoryUsersFilter::Group {
-                    group: &DirectoryGroupId::from("directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT"),
-                },
+                directory: None,
+                group: Some(&DirectoryGroupId::from(
+                    "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
+                )),
             })
             .await
             .unwrap();

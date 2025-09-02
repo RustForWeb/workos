@@ -17,7 +17,7 @@ impl From<GetDirectoryUserError> for WorkOsError<GetDirectoryUserError> {
 /// [WorkOS Docs: Get a Directory User](https://workos.com/docs/reference/directory-sync/user/get)
 #[async_trait]
 pub trait GetDirectoryUser {
-    /// Retrieves a [`DirectoryUser`] by its ID.
+    /// Get the details of an existing Directory User.
     ///
     /// [WorkOS Docs: Get a Directory User](https://workos.com/docs/reference/directory-sync/user/get)
     ///
@@ -100,31 +100,35 @@ mod test {
             .with_status(200)
             .with_body(
                 json!({
-                  "id": "directory_user_01E1JG7J09H96KYP8HM9B0G5SJ",
-                  "idp_id": "2836",
-                  "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-                  "emails": [{
-                    "primary": true,
-                    "type": "work",
-                    "value": "marcelina@foo-corp.com"
-                  }],
-                  "first_name": "Marcelina",
-                  "last_name": "Davis",
-                  "username": "marcelina@foo-corp.com",
-                  "groups": [{
-                    "id": "",
-                    "name": "Engineering",
+                    "id": "directory_user_01E1JG7J09H96KYP8HM9B0G5SJ",
+                    "idp_id": "2836",
+                    "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                    "organization_id": "org_01EZTR6WYX1A0DSE2CYMGXQ24Y",
+                    "first_name": "Marcelina",
+                    "last_name": "Davis",
+                    "emails": [{
+                        "primary": true,
+                        "type": "work",
+                        "value": "marcelina@foo-corp.com"
+                    }],
+                    "groups": [{
+                        "id": "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
+                        "idp_id": "",
+                        "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                        "name": "Engineering",
+                        "created_at": "2021-06-25T19:07:33.155Z",
+                        "updated_at": "2021-06-25T19:07:33.155Z"
+                    }],
+                    "state": "active",
                     "created_at": "2021-06-25T19:07:33.155Z",
                     "updated_at": "2021-06-25T19:07:33.155Z",
-                    "raw_attributes": {"id": ""}
-                  }],
-                  "state": "active",
-                  "created_at": "2021-06-25T19:07:33.155Z",
-                  "updated_at": "2021-06-25T19:07:33.155Z",
-                  "custom_attributes": {
-                    "department": "Engineering"
-                  },
-                  "raw_attributes": {"department": "Engineering"}
+                    "custom_attributes": {
+                        "department": "Engineering",
+                        "job_title": "Software Engineer"
+                    },
+                    "role": {
+                        "slug": "member"
+                    }
                 })
                 .to_string(),
             )

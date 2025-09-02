@@ -176,8 +176,7 @@ mod test {
                     "first_name": "Todd",
                     "idp_id": "00u1a0ufowBJlzPlk357",
                     "last_name": "Rundgren",
-                    "object": "profile",
-                    "raw_attributes": {}
+                    "object": "profile"
                   }
                 })
                 .to_string(),

@@ -21,7 +21,7 @@ pub struct RoleSlug(String);
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RoleSlugObject {
     /// A unique key to reference the role.
-    pub slug: String,
+    pub slug: RoleSlug,
 }
 
 /// The type of a [`Role`].

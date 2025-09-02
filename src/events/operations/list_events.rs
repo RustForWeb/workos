@@ -166,6 +166,17 @@ mod test {
                                         "value": "eric@example.com"
                                     }
                                 ],
+                                "groups": [
+                                    {
+                                        "id": "directory_group_01E1X5GPMMXF4T1DCERMVEEPVW",
+                                        "idp_id": "02grqrue4294w24",
+                                        "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                                        "organization_id": "org_01EZTR6WYX1A0DSE2CYMGXQ24Y",
+                                        "name": "Developers",
+                                        "created_at": "2021-06-25T19:07:33.155Z",
+                                        "updated_at": "2021-06-25T19:07:33.155Z",
+                                    }
+                                ],
                                 "first_name": "Eric",
                                 "last_name": "Schneider",
                                 "email": "eric@example.com",
@@ -178,8 +189,7 @@ mod test {
                                 },
                                 "role": {
                                     "slug": "member"
-                                },
-                                "raw_attributes": {}
+                                }
                             },
                             "group": {
                                 "id": "directory_group_01E1X5GPMMXF4T1DCERMVEEPVW",
@@ -188,8 +198,7 @@ mod test {
                                 "organization_id": "org_01EZTR6WYX1A0DSE2CYMGXQ24Y",
                                 "name": "Developers",
                                 "created_at": "2021-06-25T19:07:33.155Z",
-                                "updated_at": "2021-06-25T19:07:33.155Z",
-                                "raw_attributes": {}
+                                "updated_at": "2021-06-25T19:07:33.155Z"
                             }
                         },
                         "created_at": "2023-06-09T18:12:01.837Z"

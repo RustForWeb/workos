@@ -4,23 +4,6 @@ use serde::Serialize;
 use crate::directory_sync::{DirectoryGroup, DirectoryId, DirectorySync, DirectoryUserId};
 use crate::{PaginatedList, PaginationParams, ResponseExt, WorkOsResult};
 
-/// A filter for [`ListDirectoryGroups`].
-#[derive(Debug, Serialize)]
-#[serde(untagged)]
-pub enum DirectoryGroupsFilter<'a> {
-    /// Retrieve directory groups within the specified directory.
-    Directory {
-        /// The ID of the directory to retrieve directory groups in.
-        directory: &'a DirectoryId,
-    },
-
-    /// Retrieve directory groups a specified directory user is a member of.
-    User {
-        /// The ID of the directory user to retrieve directory groups for.
-        user: &'a DirectoryUserId,
-    },
-}
-
 /// The parameters for [`ListDirectoryGroups`].
 #[derive(Debug, Serialize)]
 pub struct ListDirectoryGroupsParams<'a> {
@@ -28,15 +11,17 @@ pub struct ListDirectoryGroupsParams<'a> {
     #[serde(flatten)]
     pub pagination: PaginationParams<'a>,
 
-    /// The filter to use when listing directory groupss.
-    #[serde(flatten)]
-    pub filter: DirectoryGroupsFilter<'a>,
+    /// Unique identifier of the WorkOS Directory.
+    pub directory: Option<&'a DirectoryId>,
+
+    /// Unique identifier of the WorkOS Directory User.
+    pub user: Option<&'a DirectoryUserId>,
 }
 
 /// [WorkOS Docs: List Directory Groups](https://workos.com/docs/reference/directory-sync/group/list)
 #[async_trait]
 pub trait ListDirectoryGroups {
-    /// Retrieves a list of [`DirectoryGroup`]s.
+    /// Get a list of all of existing directory groups matching the criteria specified.
     ///
     /// [WorkOS Docs: List Directory Groups](https://workos.com/docs/reference/directory-sync/group/list)
     ///
@@ -51,9 +36,8 @@ pub trait ListDirectoryGroups {
     /// let paginated_groups = workos
     ///     .directory_sync()
     ///     .list_directory_groups(&ListDirectoryGroupsParams {
-    ///         filter: DirectoryGroupsFilter::Directory {
-    ///             directory: &DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74"),
-    ///         },
+    ///         directory: Some(&DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74")),
+    ///         user: None,
     ///         pagination: Default::default(),
     ///     })
     ///     .await?;
@@ -127,17 +111,16 @@ mod test {
                         "id" : "directory_group_01E1JJS84MFPPQ3G655FHTKX6Z",
                         "idp_id": "02grqrue4294w24",
                         "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                        "organization_id": "org_01EZTR6WYX1A0DSE2CYMGXQ24Y",
                         "name" : "Developers",
                         "created_at": "2021-06-25T19:07:33.155Z",
-                        "updated_at": "2021-06-25T19:07:33.155Z",
-                        "raw_attributes": {"id":"02grqrue4294w24"}
-                      }],
-                      "list_metadata" : {
+                        "updated_at": "2021-06-25T19:07:33.155Z"
+                    }],
+                    "list_metadata" : {
                         "after" : "directory_group_01E1JJS84MFPPQ3G655FHTKX6Z",
                         "before" : "directory_group_01E1JJS84MFPPQ3G655FHTKX6Z"
-                      }
                     }
-                )
+                })
                 .to_string(),
             )
             .create_async()
@@ -147,9 +130,8 @@ mod test {
             .directory_sync()
             .list_directory_groups(&ListDirectoryGroupsParams {
                 pagination: Default::default(),
-                filter: DirectoryGroupsFilter::Directory {
-                    directory: &DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74"),
-                },
+                directory: Some(&DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74")),
+                user: None,
             })
             .await
             .unwrap();
@@ -188,32 +170,33 @@ mod test {
             .with_status(200)
             .with_body(
                 json!({
-                "data": [
-                    {
-                        "object": "directory_group",
-                        "id": "directory_group_01FYVX39X7A7YS95CEAJ9AJT18",
-                        "idp_id": "Developers",
-                        "directory_id": "directory_01FYVWZ2KGW7KPKGR58VHW1KT2",
-                        "name": "Developers",
-                        "created_at": "2022-03-23T17:27:24.838Z",
-                        "updated_at": "2022-03-23T17:27:24.838Z",
-                        "raw_attributes": {
-                            "meta": {
-                                "resourceType": "Group"
-                            },
-                            "members": [],
-                            "schemas": [
-                                "urn:ietf:params:scim:schemas:core:2.0:Group"
-                            ],
-                            "externalId": "0b797e61-352a-4e94-b21b-2be370ec5541",
-                            "displayName": "Developers"
+                    "data": [
+                        {
+                            "object": "directory_group",
+                            "id": "directory_group_01FYVX39X7A7YS95CEAJ9AJT18",
+                            "idp_id": "Developers",
+                            "directory_id": "directory_01FYVWZ2KGW7KPKGR58VHW1KT2",
+                            "name": "Developers",
+                            "created_at": "2022-03-23T17:27:24.838Z",
+                            "updated_at": "2022-03-23T17:27:24.838Z",
+                            "raw_attributes": {
+                                "meta": {
+                                    "resourceType": "Group"
+                                },
+                                "members": [],
+                                "schemas": [
+                                    "urn:ietf:params:scim:schemas:core:2.0:Group"
+                                ],
+                                "externalId": "0b797e61-352a-4e94-b21b-2be370ec5541",
+                                "displayName": "Developers"
+                            }
                         }
+                    ],
+                    "list_metadata": {
+                        "before": "directory_group_01FYVX39X7A7YS95CEAJ9AJT18",
+                        "after": null
                     }
-                ],
-                "list_metadata": {
-                    "before": "directory_group_01FYVX39X7A7YS95CEAJ9AJT18",
-                    "after": null
-                }})
+                })
                 .to_string(),
             )
             .create_async()
@@ -223,9 +206,10 @@ mod test {
             .directory_sync()
             .list_directory_groups(&ListDirectoryGroupsParams {
                 pagination: Default::default(),
-                filter: DirectoryGroupsFilter::User {
-                    user: &DirectoryUserId::from("directory_user_01FYVX377G1S69ASY580WK6WVN"),
-                },
+                directory: None,
+                user: Some(&DirectoryUserId::from(
+                    "directory_user_01FYVX377G1S69ASY580WK6WVN",
+                )),
             })
             .await
             .unwrap();

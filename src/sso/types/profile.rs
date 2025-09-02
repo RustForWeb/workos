@@ -1,8 +1,8 @@
 use derive_more::{Deref, Display, From};
 use serde::{Deserialize, Serialize};
 
+use crate::KnownOrUnknown;
 use crate::organizations::OrganizationId;
-use crate::{KnownOrUnknown, RawAttributes};
 
 use super::{ConnectionId, ConnectionType};
 
@@ -39,7 +39,4 @@ pub struct Profile {
 
     /// The user's last name.
     pub last_name: Option<String>,
-
-    /// The raw attributes received from the Identity Provider.
-    pub raw_attributes: RawAttributes,
 }

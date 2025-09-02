@@ -38,23 +38,23 @@ pub enum DirectoryState {
 /// [WorkOS Docs: Directory](https://workos.com/docs/reference/directory-sync/directory)
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Directory {
-    /// The ID of the directory.
+    /// Unique identifier for the Directory.
     pub id: DirectoryId,
 
-    /// The ID of the associated [`Organization`](crate::organizations::Organization) for this directory.
-    pub organization_id: Option<OrganizationId>,
-
-    /// The type of the directory.
-    pub r#type: KnownOrUnknown<DirectoryType, String>,
-
-    /// The state of the directory.
-    pub state: KnownOrUnknown<DirectoryState, String>,
+    /// The URL associated with an Enterprise Client.
+    pub domain: String,
 
     /// The name of the directory.
     pub name: String,
 
-    /// The URL associated with an Enterprise Client.
-    pub domain: Option<String>,
+    /// The unique identifier for the Organization in which the directory resides.
+    pub organization_id: Option<OrganizationId>,
+
+    /// Describes whether the Directory has been successfully connected to an external provider.
+    pub state: KnownOrUnknown<DirectoryState, String>,
+
+    /// The type of external Directory Provider integrated with.
+    pub r#type: KnownOrUnknown<DirectoryType, String>,
 
     /// The timestamps for the Directory.
     #[serde(flatten)]
@@ -74,23 +74,23 @@ pub struct DirectoryEventDomain {
 /// [WorkOS Docs: Directory Sync events](https://workos.com/docs/events/directory-sync)
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DirectoryEvent {
-    /// The ID of the directory.
+    /// Unique identifier for the Directory.
     pub id: DirectoryId,
 
-    /// The ID of the associated [`Organization`](crate::organizations::Organization) for this directory.
-    pub organization_id: Option<OrganizationId>,
-
-    /// The type of the directory.
-    pub r#type: KnownOrUnknown<DirectoryType, String>,
-
-    /// The state of the directory.
-    pub state: KnownOrUnknown<DirectoryState, String>,
+    /// The domains of the directory.
+    pub domains: Vec<DirectoryEventDomain>,
 
     /// The name of the directory.
     pub name: String,
 
-    /// The domains of the directory.
-    pub domains: Vec<DirectoryEventDomain>,
+    /// The unique identifier for the Organization in which the directory resides.
+    pub organization_id: Option<OrganizationId>,
+
+    /// Describes whether the Directory has been successfully connected to an external provider.
+    pub state: KnownOrUnknown<DirectoryState, String>,
+
+    /// The type of external Directory Provider integrated with.
+    pub r#type: KnownOrUnknown<DirectoryType, String>,
 
     /// The timestamps for the Directory.
     #[serde(flatten)]
@@ -111,14 +111,14 @@ mod test {
     fn it_deserializes_a_directory() {
         let directory: Directory = serde_json::from_str(
             &json!({
-              "id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-              "domain": "foo-corp.com",
-              "name": "Foo Corp",
-              "organization_id": "org_01EHZNVPK3SFK441A1RGBFSHRT",
-              "state": "unlinked",
-              "type": "bamboohr",
-              "created_at": "2021-06-25T19:07:33.155Z",
-              "updated_at": "2021-06-25T19:07:33.155Z"
+                "id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                "domain": "foo-corp.com",
+                "name": "Foo Corp",
+                "organization_id": "org_01EHZNVPK3SFK441A1RGBFSHRT",
+                "state": "unlinked",
+                "type": "gsuite directory",
+                "created_at": "2021-06-25T19:07:33.155Z",
+                "updated_at": "2021-06-25T19:07:33.155Z"
             })
             .to_string(),
         )
@@ -128,9 +128,9 @@ mod test {
             directory,
             Directory {
                 id: DirectoryId::from("directory_01ECAZ4NV9QMV47GW873HDCX74"),
-                domain: Some("foo-corp.com".to_string()),
+                domain: "foo-corp.com".to_string(),
                 organization_id: Some(OrganizationId::from("org_01EHZNVPK3SFK441A1RGBFSHRT")),
-                r#type: KnownOrUnknown::Known(DirectoryType::BambooHr),
+                r#type: KnownOrUnknown::Known(DirectoryType::GoogleWorkspace),
                 name: "Foo Corp".to_string(),
                 state: KnownOrUnknown::Known(DirectoryState::Inactive),
                 timestamps: Timestamps {
@@ -145,14 +145,14 @@ mod test {
     fn it_deserializes_unknown_directory_types() {
         let directory: Directory = serde_json::from_str(
             &json!({
-              "id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-              "domain": "foo-corp.com",
-              "name": "Foo Corp",
-              "organization_id": "org_01EHZNVPK3SFK441A1RGBFSHRT",
-              "state": "unlinked",
-              "type": "UnknownType",
-              "created_at": "2021-06-25T19:07:33.155Z",
-              "updated_at": "2021-06-25T19:07:33.155Z"
+                "id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                "domain": "foo-corp.com",
+                "name": "Foo Corp",
+                "organization_id": "org_01EHZNVPK3SFK441A1RGBFSHRT",
+                "state": "unlinked",
+                "type": "UnknownType",
+                "created_at": "2021-06-25T19:07:33.155Z",
+                "updated_at": "2021-06-25T19:07:33.155Z"
             })
             .to_string(),
         )

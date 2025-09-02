@@ -8,7 +8,7 @@ use crate::{ResponseExt, WorkOsError, WorkOsResult};
 /// The parameters for [`DeleteDirectory`].
 #[derive(Debug, Serialize)]
 pub struct DeleteDirectoryParams<'a> {
-    /// The ID of the directory to delete.
+    /// Unique identifier for the Directory.
     pub directory_id: &'a DirectoryId,
 }
 
@@ -25,7 +25,7 @@ impl From<DeleteDirectoryError> for WorkOsError<DeleteDirectoryError> {
 /// [WorkOS Docs: Delete a Directory](https://workos.com/docs/reference/directory-sync/directory/delete)
 #[async_trait]
 pub trait DeleteDirectory {
-    /// Deletes a [`Directory`](crate::directory_sync::Directory).
+    /// Permanently deletes an existing directory. It cannot be undone.
     ///
     /// [WorkOS Docs: Delete a Directory](https://workos.com/docs/reference/directory-sync/directory/delete)
     ///

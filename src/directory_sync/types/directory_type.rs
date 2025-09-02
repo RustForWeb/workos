@@ -21,17 +21,23 @@ pub enum DirectoryType {
     #[serde(rename = "breathe hr")]
     BreatheHr,
 
+    /// Cezanne HR.
+    ///
+    /// [WorkOS Docs: Integration Guide](https://workos.com/docs/integrations/cezanne)
+    #[serde(rename = "cezanne hr")]
+    CezanneHr,
+
     /// CyberArk SCIM v2.0.
     ///
     /// [WorkOS Docs: Integration Guide](https://workos.com/docs/integrations/cyberark-scim)
     #[serde(rename = "cyberark scim v2.0")]
     CyberArkScimV2_0,
 
-    /// Generic SCIM v1.1.
+    /// Fourth HR.
     ///
-    /// [WorkOS Docs: Integration Guide](https://workos.com/docs/integrations/scim-v1-1)
-    #[serde(rename = "generic scim v1.1")]
-    GenericScimV1_1,
+    /// [WorkOS Docs: Integration Guide](https://workos.com/docs/integrations/fourth)
+    #[serde(rename = "fourth hr")]
+    FourthHr,
 
     /// Generic SCIM v2.0.
     ///
@@ -57,12 +63,6 @@ pub enum DirectoryType {
     #[serde(rename = "jump cloud scim v2.0")]
     JumpCloudScimV2_0,
 
-    /// Okta SCIM v1.1.
-    ///
-    /// [WorkOS Docs: Integration Guide](https://workos.com/docs/integrations/okta-scim-v1-1)
-    #[serde(rename = "okta scim v1.1")]
-    OktaScimV1_1,
-
     /// Okta SCIM v2.0.
     ///
     /// [WorkOS Docs: Integration Guide](https://workos.com/docs/integrations/okta-scim-v2-0)
@@ -87,11 +87,17 @@ pub enum DirectoryType {
     #[serde(rename = "pingfederate scim v2.0")]
     PingFederateScimV2_0,
 
-    /// Rippling.
+    /// Rippling SCIM v2.0.
     ///
     /// [WorkOS Docs: Integration Guide](https://workos.com/docs/integrations/rippling)
-    #[serde(rename = "rippling")]
-    Rippling,
+    #[serde(rename = "rippling scim v2.0")]
+    RipplingScimV2_0,
+
+    /// SFTP.
+    ///
+    /// [WorkOS Docs: Integration Guide](https://workos.com/docs/integrations/sftp)
+    #[serde(rename = "sftp")]
+    Sftp,
 
     /// Workday.
     ///

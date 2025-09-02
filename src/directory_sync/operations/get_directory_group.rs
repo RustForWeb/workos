@@ -17,7 +17,7 @@ impl From<GetDirectoryGroupError> for WorkOsError<GetDirectoryGroupError> {
 /// [WorkOS Docs: Get a Directory Group](https://workos.com/docs/reference/directory-sync/group/get)
 #[async_trait]
 pub trait GetDirectoryGroup {
-    /// Retrieves a [`DirectoryGroup`] by its ID.
+    /// Get the details of an existing Directory Group.
     ///
     /// [WorkOS Docs: Get a Directory Group](https://workos.com/docs/reference/directory-sync/group/get)
     ///
@@ -91,25 +91,27 @@ mod test {
             .unwrap()
             .build();
 
-        server.mock(
-            "GET",
-            "/directory_groups/directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
-        )
-        .match_header("Authorization", "Bearer sk_example_123456789")
-        .with_status(200)
-        .with_body(
-            json!({
-              "id" : "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
-              "idp_id": "02grqrue4294w24",
-              "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
-              "name" : "Developers",
-              "created_at": "2021-06-25T19:07:33.155Z",
-              "updated_at": "2021-06-25T19:07:33.155Z",
-              "raw_attributes": {"directory_group_id" : "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT"}
-            })
-            .to_string(),
-        )
-        .create_async().await;
+        server
+            .mock(
+                "GET",
+                "/directory_groups/directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
+            )
+            .match_header("Authorization", "Bearer sk_example_123456789")
+            .with_status(200)
+            .with_body(
+                json!({
+                    "id" : "directory_group_01E64QTDNS0EGJ0FMCVY9BWGZT",
+                    "idp_id": "02grqrue4294w24",
+                    "directory_id": "directory_01ECAZ4NV9QMV47GW873HDCX74",
+                    "organization_id": "org_01EZTR6WYX1A0DSE2CYMGXQ24Y",
+                    "name" : "Developers",
+                    "created_at": "2021-06-25T19:07:33.155Z",
+                    "updated_at": "2021-06-25T19:07:33.155Z"
+                })
+                .to_string(),
+            )
+            .create_async()
+            .await;
 
         let directory = workos
             .directory_sync()
