@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{organizations::OrganizationId, sso::AccessToken};
+use crate::{
+    organizations::OrganizationId,
+    sso::AccessToken,
+    user_management::{CookieSession, SealDataError, SessionCookieData},
+};
 
 use super::{Impersonator, RefreshToken, User};
 
@@ -36,7 +40,7 @@ pub enum AuthenticationMethod {
 }
 
 /// The response for authenticate requests.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 pub struct AuthenticationResponse {
     /// The corresponding user object.
     pub user: User,
@@ -55,4 +59,20 @@ pub struct AuthenticationResponse {
 
     /// The WorkOS Dashboard user who is impersonating the user.
     pub impersonator: Option<Impersonator>,
+}
+
+impl AuthenticationResponse {
+    /// The sealed session data.
+    pub fn sealed_session(&self, cookie_password: &str) -> Result<String, SealDataError> {
+        CookieSession::seal_data(
+            SessionCookieData {
+                user: self.user.clone(),
+                organization_id: self.organization_id.clone(),
+                access_token: self.access_token.clone(),
+                refresh_token: self.refresh_token.clone(),
+                impersonator: self.impersonator.clone(),
+            },
+            cookie_password,
+        )
+    }
 }

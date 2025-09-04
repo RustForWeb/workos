@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// [WorkOS Docs: Impersonation](https://workos.com/docs/user-management/impersonation)
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Impersonator {
     /// The email address of the WorkOS Dashboard user who is impersonating the user
     pub email: String,
