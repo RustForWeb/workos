@@ -13,7 +13,9 @@ native-tls = ["reqwest/native-tls"]
 rustls-tls = ["reqwest/rustls-tls"]
 
 [dependencies]
+aes-gcm = "0.10.3"
 async-trait = "0.1.88"
+base64 = "0.22.1"
 chrono = { version = "0.4.40", features = ["serde"] }
 derive_more = { version = "2.0.1", features = ["deref", "display", "from"] }
 jsonwebtoken = "9.3.1"

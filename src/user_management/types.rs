@@ -16,6 +16,7 @@ mod pending_authentication_token;
 mod provider;
 mod refresh_token;
 mod session;
+mod session_cookie_data;
 mod user;
 
 pub use authenticate_error::*;
@@ -36,4 +37,5 @@ pub use pending_authentication_token::*;
 pub use provider::*;
 pub use refresh_token::*;
 pub use session::*;
+pub use session_cookie_data::*;
 pub use user::*;
