@@ -48,7 +48,7 @@ impl GetLogoutUrl for UserManagement<'_> {
         } = params;
 
         let session_id = session_id.to_string();
-        let return_to = return_to.map(|return_to| return_to.to_string());
+        let return_to = return_to.map(|return_to| urlencoding::encode(return_to.as_str()));
 
         let query = {
             let mut query_params: querystring::QueryParams = vec![("session_id", &session_id)];
@@ -92,7 +92,7 @@ mod test {
 
         assert_eq!(
             logout_url,
-            Url::parse("https://api.workos.com/user_management/sessions/logout?session_id=session_01HQAG1HENBZMAZD82YRXDFC0B&return_to=https://your-app.com/signed-out").unwrap()
+            Url::parse("https://api.workos.com/user_management/sessions/logout?session_id=session_01HQAG1HENBZMAZD82YRXDFC0B&return_to=https%3A%2F%2Fyour-app.com%2Fsigned-out").unwrap()
         );
 
         Ok(())

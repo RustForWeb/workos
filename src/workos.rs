@@ -8,7 +8,7 @@ use crate::organization_domains::OrganizationDomains;
 use crate::organizations::Organizations;
 use crate::portal::Portal;
 use crate::roles::Roles;
-use crate::sso::Sso;
+use crate::sso::{ClientId, Sso};
 use crate::user_management::UserManagement;
 use crate::widgets::Widgets;
 
@@ -18,6 +18,7 @@ pub struct WorkOs {
     base_url: Url,
     key: ApiKey,
     client: reqwest::Client,
+    client_id: Option<ClientId>,
 }
 
 impl WorkOs {
@@ -41,6 +42,10 @@ impl WorkOs {
 
     pub(crate) fn client(&self) -> &reqwest::Client {
         &self.client
+    }
+
+    pub(crate) fn client_id(&self) -> Option<&ClientId> {
+        self.client_id.as_ref()
     }
 
     /// Returns a [`DirectorySync`] instance.
@@ -98,6 +103,7 @@ impl WorkOs {
 pub struct WorkOsBuilder<'a> {
     base_url: Url,
     key: &'a ApiKey,
+    client_id: Option<&'a ClientId>,
 }
 
 impl<'a> WorkOsBuilder<'a> {
@@ -106,6 +112,7 @@ impl<'a> WorkOsBuilder<'a> {
         Self {
             base_url: Url::parse("https://api.workos.com").unwrap(),
             key,
+            client_id: None,
         }
     }
 
@@ -121,6 +128,12 @@ impl<'a> WorkOsBuilder<'a> {
         self
     }
 
+    /// Sets the client ID that the client will use.
+    pub fn client_id(mut self, client_id: &'a ClientId) -> Self {
+        self.client_id = Some(client_id);
+        self
+    }
+
     /// Consumes the builder and returns the constructed client.
     pub fn build(self) -> WorkOs {
         let client = reqwest::Client::builder()
@@ -132,6 +145,7 @@ impl<'a> WorkOsBuilder<'a> {
             base_url: self.base_url,
             key: self.key.to_owned(),
             client,
+            client_id: self.client_id.cloned(),
         }
     }
 }

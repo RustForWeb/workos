@@ -105,10 +105,12 @@ impl GetAuthorizationUrl for Sso<'_> {
                 ),
             };
 
+            let redirect_uri = urlencoding::encode(redirect_uri);
+
             let mut query_params: querystring::QueryParams = vec![
                 ("response_type", "code"),
                 ("client_id", &client_id),
-                ("redirect_uri", redirect_uri),
+                ("redirect_uri", &redirect_uri),
                 (connection_selector_param.0, &connection_selector_param.1),
             ];
 
@@ -149,7 +151,7 @@ mod test {
         assert_eq!(
             authorization_url,
             Url::parse(
-                "https://api.workos.com/sso/authorize?response_type=code&client_id=client_123456789&redirect_uri=https://your-app.com/callback&connection=conn_1234"
+                "https://api.workos.com/sso/authorize?response_type=code&client_id=client_123456789&redirect_uri=https%3A%2F%2Fyour-app.com%2Fcallback&connection=conn_1234"
             )
             .unwrap()
         )
@@ -174,7 +176,7 @@ mod test {
         assert_eq!(
             authorization_url,
             Url::parse(
-                "https://api.workos.com/sso/authorize?response_type=code&client_id=client_123456789&redirect_uri=https://your-app.com/callback&organization=org_1234"
+                "https://api.workos.com/sso/authorize?response_type=code&client_id=client_123456789&redirect_uri=https%3A%2F%2Fyour-app.com%2Fcallback&organization=org_1234"
             )
             .unwrap()
         )
@@ -197,7 +199,7 @@ mod test {
         assert_eq!(
             authorization_url,
             Url::parse(
-                "https://api.workos.com/sso/authorize?response_type=code&client_id=client_123456789&redirect_uri=https://your-app.com/callback&provider=GoogleOAuth"
+                "https://api.workos.com/sso/authorize?response_type=code&client_id=client_123456789&redirect_uri=https%3A%2F%2Fyour-app.com%2Fcallback&provider=GoogleOAuth"
             )
             .unwrap()
         )
