@@ -2,7 +2,9 @@
 all-features = true
 
 [advisories]
-ignore = []
+ignore = [
+    { id = "RUSTSEC-2023-0071", reason = "No safe upgrade available for `rsa`." },
+]
 
 [bans]
 allow-wildcard-paths = true

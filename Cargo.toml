@@ -16,7 +16,7 @@ rustls-tls = ["reqwest/rustls-tls"]
 async-trait = "0.1.88"
 chrono = { version = "0.4.40", features = ["serde"] }
 derive_more = { version = "2.0.1", features = ["deref", "display", "from"] }
-jsonwebtoken = "10.0.0"
+jsonwebtoken = { version = "10.0.0", features = ["rust_crypto"] }
 querystring = "1.1.0"
 reqwest = { version = "0.12.0", features = ["json"] }
 serde = { version = "1.0.219", features = ["derive"] }
