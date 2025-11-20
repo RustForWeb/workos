@@ -315,7 +315,7 @@ mod test {
                 "The code '123456' has expired or is invalid."
             );
         } else {
-            panic!("expected authenticate_with_magic_auth to return an error")
+            panic!("expected authenticate_with_email_verification to return an error")
         }
     }
 }
