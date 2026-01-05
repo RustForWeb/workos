@@ -12,6 +12,7 @@ repos:
       hooks:
           - id: fmt
           - id: clippy
+            args: ['--all-targets', '--all-features', '--', '-D', 'warnings']
 
     - repo: https://github.com/EmbarkStudios/cargo-deny
       rev: 0.18.9
@@ -28,6 +29,7 @@ repos:
             name: cargo-machete
             language: rust
             entry: cargo machete
+            args: ['--with-metadata']
             types: [file, toml]
             files: Cargo\.(toml|lock)
             pass_filenames: false
