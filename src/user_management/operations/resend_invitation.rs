@@ -2,51 +2,36 @@ use async_trait::async_trait;
 use serde::Serialize;
 use thiserror::Error;
 
-use crate::organizations::OrganizationId;
-use crate::roles::RoleSlug;
-use crate::user_management::{Invitation, Locale, UserId, UserManagement};
+use crate::user_management::{Invitation, InvitationId, Locale, UserManagement};
 use crate::{ResponseExt, WorkOsError, WorkOsResult};
 
-/// The parameters for [`SendInvitation`].
+/// The parameters for [`ResendInvitation`].
 #[derive(Debug, Serialize)]
-pub struct SendInvitationParams<'a> {
-    /// The email address of the recipient.
-    pub email: &'a str,
-
-    /// The ID of the organization that the recipient will join.
-    pub organization_id: Option<&'a OrganizationId>,
-
-    /// How many days the invitations will be valid for.
-    pub expires_in_days: Option<u8>,
-
-    /// The ID of the user who invites the recipient.
-    ///
-    /// The invitation email will mention the name of this user.
-    pub inviter_user_id: Option<&'a UserId>,
-
-    /// The role that the recipient will receive when they join the organization in the invitation.
-    pub role_slug: Option<&'a RoleSlug>,
+pub struct ResendInvitationParams<'a> {
+    /// The ID of the invitation.
+    #[serde(skip_serializing)]
+    pub invitation_id: &'a InvitationId,
 
     /// The locale to use when rendering the invitation email.
     pub locale: Option<&'a Locale>,
 }
 
-/// An error returned from [`SendInvitation`].
+/// An error returned from [`ResendInvitation`].
 #[derive(Debug, Error)]
-pub enum SendInvitationError {}
+pub enum ResendInvitationError {}
 
-impl From<SendInvitationError> for WorkOsError<SendInvitationError> {
-    fn from(err: SendInvitationError) -> Self {
+impl From<ResendInvitationError> for WorkOsError<ResendInvitationError> {
+    fn from(err: ResendInvitationError) -> Self {
         Self::Operation(err)
     }
 }
 
-/// [WorkOS Docs: Send an invitation](https://workos.com/docs/reference/user-management/invitation/send)
+/// [WorkOS Docs: Resend an invitation](https://workos.com/docs/reference/user-management/invitation/resend)
 #[async_trait]
-pub trait SendInvitation {
-    /// Sends an invitation email to the recipient.
+pub trait ResendInvitation {
+    /// Resends an invitation email to the recipient. The invitation must be in a pending state.
     ///
-    /// [WorkOS Docs: Send an invitation](https://workos.com/docs/reference/user-management/invitation/send)
+    /// [WorkOS Docs: Resend an invitation](https://workos.com/docs/reference/user-management/invitation/resend)
     ///
     /// # Examples
     ///
@@ -55,39 +40,35 @@ pub trait SendInvitation {
     /// # use workos::user_management::*;
     /// use workos::{ApiKey, WorkOs};
     ///
-    /// # async fn run() -> WorkOsResult<(), SendInvitationError> {
+    /// # async fn run() -> WorkOsResult<(), ResendInvitationError> {
     /// let workos = WorkOs::new(&ApiKey::from("sk_example_123456789"));
     ///
     /// let invitation = workos
     ///     .user_management()
-    ///     .send_invitation(&SendInvitationParams {
-    ///          email: "marcelina@example.com",
-    ///          organization_id: None,
-    ///          expires_in_days: None,
-    ///          inviter_user_id: None,
-    ///          role_slug: None,
-    ///          locale: None,
+    ///     .resend_invitation(&ResendInvitationParams {
+    ///         invitation_id: &InvitationId::from("invitation_01E4ZCR3C56J083X43JQXF3JK5"),
+    ///         locale: None,
     ///     })
     ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
-    async fn send_invitation(
+    async fn resend_invitation(
         &self,
-        params: &SendInvitationParams<'_>,
-    ) -> WorkOsResult<Invitation, SendInvitationError>;
+        params: &ResendInvitationParams<'_>,
+    ) -> WorkOsResult<Invitation, ResendInvitationError>;
 }
 
 #[async_trait]
-impl SendInvitation for UserManagement<'_> {
-    async fn send_invitation(
+impl ResendInvitation for UserManagement<'_> {
+    async fn resend_invitation(
         &self,
-        params: &SendInvitationParams<'_>,
-    ) -> WorkOsResult<Invitation, SendInvitationError> {
-        let url = self
-            .workos
-            .base_url()
-            .join("/user_management/invitations")?;
+        params: &ResendInvitationParams<'_>,
+    ) -> WorkOsResult<Invitation, ResendInvitationError> {
+        let url = self.workos.base_url().join(&format!(
+            "/user_management/invitations/{id}/resend",
+            id = params.invitation_id
+        ))?;
         let invitation = self
             .workos
             .client()
@@ -116,7 +97,7 @@ mod test {
     use super::*;
 
     #[tokio::test]
-    async fn it_calls_the_send_invitation_endpoint() {
+    async fn it_calls_the_resend_invitation_endpoint() {
         let mut server = mockito::Server::new_async().await;
 
         let workos = WorkOs::builder(&ApiKey::from("sk_example_123456789"))
@@ -125,9 +106,9 @@ mod test {
             .build();
 
         server
-            .mock("POST", "/user_management/invitations")
+            .mock("POST", "/user_management/invitations/invitation_01E4ZCR3C56J083X43JQXF3JK5/resend")
             .match_header("Authorization", "Bearer sk_example_123456789")
-            .with_status(201)
+            .with_status(200)
             .with_body(
                 json!({
                     "object": "invitation",
@@ -141,6 +122,7 @@ mod test {
                     "accept_invitation_url": "https://your-app.com/invite?invitation_token=Z1uX3RbwcIl5fIGJJJCXXisdI",
                     "organization_id": "org_01E4ZCR3C56J083X43JQXF3JK5",
                     "inviter_user_id": "user_01HYGBX8ZGD19949T3BM4FW1C3",
+                    "accepted_user_id": null,
                     "created_at": "2021-06-25T19:07:33.155Z",
                     "updated_at": "2021-06-25T19:07:33.155Z"
                 })
@@ -151,12 +133,8 @@ mod test {
 
         let invitation = workos
             .user_management()
-            .send_invitation(&SendInvitationParams {
-                email: "marcelina@example.com",
-                organization_id: None,
-                expires_in_days: None,
-                inviter_user_id: None,
-                role_slug: None,
+            .resend_invitation(&ResendInvitationParams {
+                invitation_id: &InvitationId::from("invitation_01E4ZCR3C56J083X43JQXF3JK5"),
                 locale: None,
             })
             .await
@@ -165,6 +143,6 @@ mod test {
         assert_eq!(
             invitation.id,
             InvitationId::from("invitation_01E4ZCR3C56J083X43JQXF3JK5")
-        )
+        );
     }
 }
