@@ -79,7 +79,7 @@ impl CreateOrganizationMembership for UserManagement<'_> {
         let url = self
             .workos
             .base_url()
-            .join("/user_management/organization_membership")?;
+            .join("/user_management/organization_memberships")?;
         let organization_membership = self
             .workos
             .client()
@@ -117,7 +117,7 @@ mod test {
             .build();
 
         server
-            .mock("POST", "/user_management/organization_membership")
+            .mock("POST", "/user_management/organization_memberships")
             .match_header("Authorization", "Bearer sk_example_123456789")
             .with_status(201)
             .with_body(
