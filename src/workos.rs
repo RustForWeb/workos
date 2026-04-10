@@ -104,6 +104,7 @@ pub struct WorkOsBuilder<'a> {
     base_url: Url,
     key: &'a ApiKey,
     client_id: Option<&'a ClientId>,
+    client: Option<reqwest::Client>,
 }
 
 impl<'a> WorkOsBuilder<'a> {
@@ -113,6 +114,7 @@ impl<'a> WorkOsBuilder<'a> {
             base_url: Url::parse("https://api.workos.com").unwrap(),
             key,
             client_id: None,
+            client: None,
         }
     }
 
@@ -134,12 +136,20 @@ impl<'a> WorkOsBuilder<'a> {
         self
     }
 
+    /// Sets the [`reqwest::Client`] to use.
+    pub fn client(mut self, client: reqwest::Client) -> Self {
+        self.client = Some(client);
+        self
+    }
+
     /// Consumes the builder and returns the constructed client.
     pub fn build(self) -> WorkOs {
-        let client = reqwest::Client::builder()
-            .user_agent(concat!("workos-rust/", env!("CARGO_PKG_VERSION")))
-            .build()
-            .unwrap();
+        let client = self.client.unwrap_or_else(|| {
+            reqwest::Client::builder()
+                .user_agent(concat!("workos-rust/", env!("CARGO_PKG_VERSION")))
+                .build()
+                .unwrap()
+        });
 
         WorkOs {
             base_url: self.base_url,
@@ -152,6 +162,8 @@ impl<'a> WorkOsBuilder<'a> {
 
 #[cfg(test)]
 mod test {
+    use reqwest::StatusCode;
+
     use super::*;
 
     #[test]
@@ -201,5 +213,33 @@ mod test {
         let response_body = response.text().await.unwrap();
 
         assert_eq!(response_body, "User-Agent correctly set")
+    }
+
+    #[tokio::test]
+    async fn it_supports_setting_the_reqwest_client() {
+        let mut server = mockito::Server::new_async().await;
+
+        let workos = WorkOs::builder(&ApiKey::from("sk_example_123456789"))
+            .base_url(&server.url())
+            .unwrap()
+            .client(
+                reqwest::Client::builder()
+                    .user_agent("custom")
+                    .build()
+                    .unwrap(),
+            )
+            .build();
+
+        server
+            .mock("GET", "/health")
+            .match_header("User-Agent", "custom")
+            .with_status(204)
+            .create_async()
+            .await;
+
+        let url = workos.base_url().join("/health").unwrap();
+        let response = workos.client().get(url).send().await.unwrap();
+
+        assert_eq!(response.status(), StatusCode::NO_CONTENT);
     }
 }
