@@ -18,63 +18,6 @@ permissions:
 jobs:
     release:
         name: Release
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Generate GitHub App token
-              id: app-token
-              uses: getsentry/action-github-app-token@v3
-              with:
-                  app_id: ${{ secrets.APP_ID }}
-                  private_key: ${{ secrets.APP_PRIVATE_KEY }}
-
-            - name: Checkout
-              uses: actions/checkout@v6
-
-            - name: Set up Rust toolchain
-              uses: actions-rust-lang/setup-rust-toolchain@v1
-              with:
-                  target: wasm32-unknown-unknown
-
-            - name: Install Cargo Binary Install
-              uses: cargo-bins/cargo-binstall@main
-
-            - name: Install crates
-              run: cargo binstall --force -y cargo-workspaces toml-cli
-
-            - name: Bump version
-              run: cargo workspaces version --all --no-git-commit --yes ${{ inputs.bump }}
-
-            - name: Extract version
-              id: extract-version
-              run: echo "VERSION=v$(toml get Cargo.toml package.version --raw)" >> "$GITHUB_OUTPUT"
-
-            - name: Add changes
-              run: git add .
-
-            - name: Commit
-              uses: dsanders11/github-app-commit-action@v2
-              with:
-                  message: ${{ steps.extract-version.outputs.VERSION }}
-                  token: ${{ steps.app-token.outputs.token }}
-
-            - name: Reset and pull
-              run: git reset --hard && git pull
-
-            - name: Tag
-              uses: bruno-fs/repo-tagger@1.0.0
-              with:
-                  tag: ${{ steps.extract-version.outputs.VERSION }}
-              env:
-                  GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-            - name: Release
-              uses: softprops/action-gh-release@v3
-              with:
-                  generate_release_notes: true
-                  make_latest: true
-                  tag_name: ${{ steps.extract-version.outputs.VERSION }}
-                  token: ${{ steps.app-token.outputs.token }}
-
-            - name: Publish
-              run: cargo workspaces publish --publish-as-is --token "${{ secrets.CRATES_IO_TOKEN }}"
+        uses: RustForWeb/.github/.github/workflows/release.yml@c18f3b7315df398b6af8d03f823e31daeda63114
+        with:
+            bump: ${{ inputs.bump }}
