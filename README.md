@@ -1,7 +1,7 @@
 > [!WARNING]
 > This project has been superseded by the [official WorkOS Rust SDK](https://github.com/workos/workos-rust).
 >
-> The official SDK still uses the `workos` crate name, but versioning starts at `v1.0.0`. This repository is the archived source code the unoffical SDK, which was published as `v0.3.0` until `v0.8.1`.
+> The official SDK still uses the `workos` crate name, but versioning starts at `v1.0.0`. This repository is the archived source code of the unoffical SDK, which was published as versions `v0.3.0` until `v0.8.1`.
 
 ---
 
